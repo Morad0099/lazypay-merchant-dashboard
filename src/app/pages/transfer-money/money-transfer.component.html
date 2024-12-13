@@ -1,0 +1,307 @@
+<!-- money-transfer.component.html -->
+<div class="money-transfer-container">
+    <!-- Header -->
+    <div class="header">
+      <div class="title-section">
+        <h1>Money Transfer</h1>
+        <p>Send money or fund your wallet</p>
+      </div>
+    </div>
+  
+    <!-- Tabs -->
+    <div class="tabs-container">
+      <button 
+        class="tab-button" 
+        [class.active]="activeTab === 'send'"
+        (click)="switchTab('send')">
+        <i class="material-icons">send</i>
+        Send Money
+      </button>
+      <button 
+        class="tab-button" 
+        [class.active]="activeTab === 'fund'"
+        (click)="switchTab('fund')">
+        <i class="material-icons">account_balance_wallet</i>
+        Fund Wallet
+      </button>
+    </div>
+  
+    <!-- Send Money Form -->
+    <div class="form-container" *ngIf="activeTab === 'send'">
+      <div class="form-header">
+        <h2>Send Money</h2>
+        <p>Transfer money to mobile money or bank account</p>
+      </div>
+  
+      <form [formGroup]="sendMoneyForm" (ngSubmit)="onSendMoney()" class="transfer-form">
+        <!-- Transfer Type Selection -->
+        <div class="form-group">
+          <label>Transfer Type</label>
+          <div class="radio-group">
+            <label class="radio-label">
+              <input 
+                type="radio" 
+                formControlName="transferType" 
+                value="momo"
+                (change)="onTransferTypeChange()">
+              <span class="radio-text">Mobile Money</span>
+            </label>
+            <label class="radio-label">
+              <input 
+                type="radio" 
+                formControlName="transferType" 
+                value="bank"
+                (change)="onTransferTypeChange()">
+              <span class="radio-text">Bank Transfer</span>
+            </label>
+          </div>
+        </div>
+  
+        <!-- Mobile Money Fields -->
+        <ng-container *ngIf="sendMoneyForm.get('transferType')?.value === 'momo'">
+          <div class="form-group">
+            <label>Network Provider</label>
+            <select formControlName="account_issuer">
+              <option value="">Select Provider</option>
+              <option value="mtn">MTN Mobile Money</option>
+              <option value="vod">Vodafone Cash</option>
+              <option value="tgo">AirtelTigo Money</option>
+            </select>
+            <div class="error-message" *ngIf="sendMoneyForm.get('account_issuer')?.touched && sendMoneyForm.get('account_issuer')?.errors?.['required']">
+              Please select a provider
+            </div>
+          </div>
+        </ng-container>
+  
+        <!-- Bank Fields -->
+        <ng-container *ngIf="sendMoneyForm.get('transferType')?.value === 'bank'">
+          <div class="form-group">
+            <label>Select Bank</label>
+            <select formControlName="account_issuer">
+              <option value="">Select Bank</option>
+              <option *ngFor="let bank of banks" [value]="bank.BankCode">
+                {{bank.BankName}}
+              </option>
+            </select>
+            <div class="error-message" *ngIf="sendMoneyForm.get('account_issuer')?.touched && sendMoneyForm.get('account_issuer')?.errors?.['required']">
+              Please select a bank
+            </div>
+          </div>
+        </ng-container>
+  
+        <!-- Common Fields -->
+        <div class="form-group">
+          <label>Account Number</label>
+          <div class="input-group">
+            <input 
+              type="text" 
+              formControlName="account_number"
+              [maxLength]="10"
+              placeholder="Enter account number">
+            <button 
+              type="button"
+              class="verify-btn"
+              [disabled]="!canVerify"
+              (click)="verifyAccount()">
+              <i class="material-icons">verified</i>
+              Verify
+            </button>
+          </div>
+          <div class="error-message" *ngIf="sendMoneyForm.get('account_number')?.touched && sendMoneyForm.get('account_number')?.errors?.['required']">
+            Account number is required
+          </div>
+          <div class="error-message" *ngIf="sendMoneyForm.get('account_number')?.touched && sendMoneyForm.get('account_number')?.errors?.['minlength']">
+            Please enter a valid account number
+          </div>
+        </div>
+  
+        <div class="form-group">
+          <label>Account Name</label>
+          <input 
+            type="text" 
+            formControlName="account_name"
+            readonly
+            [class.verified]="isAccountVerified">
+        </div>
+  
+        <div class="form-group">
+          <label>Amount (GHS)</label>
+          <input 
+            type="number" 
+            formControlName="amount"
+            min="1"
+            placeholder="Enter amount">
+          <div class="error-message" *ngIf="sendMoneyForm.get('amount')?.touched && sendMoneyForm.get('amount')?.errors?.['required']">
+            Amount is required
+          </div>
+          <div class="error-message" *ngIf="sendMoneyForm.get('amount')?.touched && sendMoneyForm.get('amount')?.errors?.['min']">
+            Amount must be greater than 0
+          </div>
+        </div>
+  
+        <div class="form-group">
+          <label>Description</label>
+          <textarea 
+            formControlName="description"
+            rows="2"
+            placeholder="Enter transfer description"></textarea>
+          <div class="error-message" *ngIf="sendMoneyForm.get('description')?.touched && sendMoneyForm.get('description')?.errors?.['required']">
+            Description is required
+          </div>
+        </div>
+  
+        <!-- OTP Section -->
+        <ng-container *ngIf="showOtpSection">
+          <div class="otp-section">
+            <div class="form-group">
+              <label>Enter OTP</label>
+              <div class="input-group">
+                <input 
+                  type="text" 
+                  formControlName="otp"
+                  maxlength="5"
+                  placeholder="Enter OTP code">
+                <button 
+                  type="button"
+                  class="resend-btn"
+                  (click)="resendOtp()">
+                  Resend OTP
+                </button>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+  
+        <!-- Action Buttons -->
+        <div class="form-actions">
+          <button 
+            type="button" 
+            class="request-otp-btn"
+            *ngIf="!showOtpSection && isAccountVerified"
+            (click)="requestOtp()">
+            <i class="material-icons">sms</i>
+            Request OTP
+          </button>
+  
+          <button 
+            type="submit" 
+            class="submit-btn"
+            *ngIf="showOtpSection"
+            [disabled]="!sendMoneyForm.valid || isSubmitting">
+            <i class="material-icons">send</i>
+            {{ isSubmitting ? 'Processing...' : 'Send Money' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  
+    <!-- Fund Wallet Form -->
+    <div class="form-container" *ngIf="activeTab === 'fund'">
+      <div class="form-header">
+        <h2>Fund Wallet</h2>
+        <p>Add money to your wallet via mobile money</p>
+      </div>
+  
+      <form [formGroup]="fundWalletForm" (ngSubmit)="onFundWallet()" class="transfer-form">
+        <div class="form-group">
+          <label>Payment Method</label>
+          <select formControlName="account_issuer">
+            <option value="mtn">MTN Mobile Money</option>
+            <option value="vod">Vodafone Cash</option>
+            <option value="tgo">AirtelTigo Money</option>
+          </select>
+        </div>
+  
+        <div class="form-group">
+          <label>Mobile Number</label>
+          <input 
+            type="text" 
+            formControlName="account_number"
+            [maxLength]="10"
+            placeholder="Enter mobile number">
+          <div class="error-message" *ngIf="fundWalletForm.get('account_number')?.touched && fundWalletForm.get('account_number')?.errors?.['required']">
+            Mobile number is required
+          </div>
+          <div class="error-message" *ngIf="fundWalletForm.get('account_number')?.touched && fundWalletForm.get('account_number')?.errors?.['minlength']">
+            Please enter a valid mobile number
+          </div>
+        </div>
+  
+        <div class="form-group">
+          <label>Amount (GHS)</label>
+          <input 
+            type="number" 
+            formControlName="amount"
+            min="1"
+            placeholder="Enter amount">
+          <div class="error-message" *ngIf="fundWalletForm.get('amount')?.touched && fundWalletForm.get('amount')?.errors?.['required']">
+            Amount is required
+          </div>
+          <div class="error-message" *ngIf="fundWalletForm.get('amount')?.touched && fundWalletForm.get('amount')?.errors?.['min']">
+            Amount must be greater than 0
+          </div>
+        </div>
+  
+        <!-- OTP Section -->
+        <ng-container *ngIf="showFundWalletOtp">
+          <div class="otp-section">
+            <div class="form-group">
+              <label>Enter OTP</label>
+              <div class="input-group">
+                <input 
+                  type="text" 
+                  formControlName="otp"
+                  maxlength="5"
+                  placeholder="Enter OTP code">
+                <button 
+                  type="button"
+                  class="resend-btn"
+                  (click)="resendFundWalletOtp()">
+                  Resend OTP
+                </button>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+  
+        <!-- Action Buttons -->
+        <div class="form-actions">
+          <button 
+            type="button" 
+            class="request-otp-btn"
+            *ngIf="!showFundWalletOtp"
+            (click)="requestFundWalletOtp()">
+            <i class="material-icons">sms</i>
+            Request OTP
+          </button>
+  
+          <button 
+            type="submit" 
+            class="submit-btn"
+            *ngIf="showFundWalletOtp"
+            [disabled]="!fundWalletForm.valid || isSubmitting">
+            <i class="material-icons">account_balance_wallet</i>
+            {{ isSubmitting ? 'Processing...' : 'Fund Wallet' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  
+    <!-- Success Modal -->
+    <div class="modal" *ngIf="showSuccessModal">
+      <div class="modal-content success">
+        <i class="material-icons">check_circle</i>
+        <h3>{{successMessage}}</h3>
+        <button (click)="closeSuccessModal()">Close</button>
+      </div>
+    </div>
+  
+    <!-- Error Modal -->
+    <div class="modal" *ngIf="showErrorModal">
+      <div class="modal-content error">
+        <i class="material-icons">error</i>
+        <h3>{{errorMessage}}</h3>
+        <button (click)="closeErrorModal()">Close</button>
+      </div>
+    </div>
+  </div>

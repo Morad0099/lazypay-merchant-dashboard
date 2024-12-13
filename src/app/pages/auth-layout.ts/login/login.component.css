@@ -1,0 +1,22 @@
+:host {
+  @apply block min-h-screen;
+}
+
+/* Custom input autofill styling */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 30px white inset !important;
+  -webkit-text-fill-color: #1f2937 !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Custom form field animations */
+.form-field-animate {
+  @apply transition-all duration-200 ease-in-out;
+}
+
+/* Custom focus ring color */
+.ring-focus {
+  @apply ring-2 ring-blue-500 ring-offset-2;
+}
