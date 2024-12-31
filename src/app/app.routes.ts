@@ -1,7 +1,5 @@
 import { Routes } from '@angular/router';
 import { AuthGuard } from './guard/auth.guard';
-import { MerchantTransactionsComponent } from './pages/merchants/merchant-transactions.component';
-import { MerchantDetailsComponent } from './pages/merchants/mechant-details.component';
 import { MerchantSettlementsComponent } from './pages/merchants/merchant-settlement.component';
 import { HubDashboardComponent } from './pages/hub/hub-dashboard.component';
 import { TransactionsMerchantComponent } from './pages/transactions-merchant/transactions-merchant.component';
