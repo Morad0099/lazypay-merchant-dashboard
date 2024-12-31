@@ -74,6 +74,8 @@ export interface ApiTransaction {
   recipient_account_name: string;
   recipient_account_number: string;
   recipient_account_type: string;
+  balanceAfterCredit: string;
+  balanceBeforCredit: string;
 }
 
 export interface SetAllMerchants{

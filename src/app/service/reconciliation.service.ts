@@ -2,9 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map, retry } from 'rxjs/operators';
-import { Transaction ,  TransactionSummary  ,ApiTransaction} from '../types';
+import { Transaction, TransactionSummary, ApiTransaction } from '../types';
 import API from '../constants/api.constant';
-
 
 // Define interfaces for request payloads
 interface TransactionFilter {
@@ -16,17 +15,17 @@ interface TransactionFilter {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ReconciliationService {
   private readonly apiUrl = `${API}/transactions/role/reports`;
-  
+
   constructor(private http: HttpClient) {}
 
   getTransactions(filter: TransactionFilter): Observable<ApiTransaction[]> {
-    return this.http.post<any>(this.apiUrl, filter).pipe(
-      map(response => this.transformTransactions(response))
-    );
+    return this.http
+      .post<any>(this.apiUrl, filter)
+      .pipe(map((response) => this.transformTransactions(response)));
   }
 
   private transformTransactions(response: any): ApiTransaction[] {
@@ -50,14 +49,26 @@ export class ReconciliationService {
       transactionRef: transaction.transactionRef,
       externalTransactionId: transaction.externalTransactionId,
       transaction_type: transaction.transaction_type,
-      customerType: transaction.customerType
+      customerType: transaction.customerType,
+      balanceAfterCredit: transaction.balanceAfterCredit,
+      balanceBeforCredit: transaction.balanceBeforCredit,
+      reason: transaction.reason,
+      debitOperator: transaction.debitOperator,
+      charge_type: transaction.charge_type,
+      processAttempts: transaction.processAttempts,
+      callbackUrl: transaction.callbackUrl,
+      description: transaction.description,
+      recipient_account_name: transaction.recipient_account_name,
+      recipient_account_number: transaction.recipient_account_number,
+      recipient_account_issuer_name: transaction.recipient_account_issuer_name,
+      recipient_account_type: transaction.recipient_account_type,
     }));
   }
 
   // Error handling
   private handleError(error: HttpErrorResponse) {
     let errorMessage = 'An error occurred';
-    
+
     if (error.error instanceof ErrorEvent) {
       // Client-side error
       errorMessage = `Error: ${error.error.message}`;
@@ -68,7 +79,8 @@ export class ReconciliationService {
           errorMessage = 'Unauthorized. Please login again.';
           break;
         case 403:
-          errorMessage = 'Forbidden. You don\'t have permission to access this resource.';
+          errorMessage =
+            "Forbidden. You don't have permission to access this resource.";
           break;
         case 404:
           errorMessage = 'The requested resource was not found.';
@@ -80,10 +92,8 @@ export class ReconciliationService {
           errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
       }
     }
-    
+
     console.error('ReconciliationService Error:', errorMessage);
     return throwError(() => new Error(errorMessage));
   }
-
- 
 }
