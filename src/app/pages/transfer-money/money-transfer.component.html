@@ -88,6 +88,10 @@
             </div>
           </div>
         </ng-container>
+
+        <div *ngIf="isVerifyingAccount" class="loader-overlay">
+          <div class="loader"></div>
+        </div>
   
         <!-- Common Fields -->
         <div class="form-group">
@@ -96,7 +100,6 @@
             <input 
               type="text" 
               formControlName="account_number"
-              [maxLength]="10"
               placeholder="Enter account number">
             <button 
               type="button"

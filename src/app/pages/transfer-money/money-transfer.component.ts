@@ -25,6 +25,7 @@ export class MoneyTransferComponent implements OnInit {
   showErrorModal = false;
   successMessage = '';
   errorMessage = '';
+  isVerifyingAccount = false;
 
   constructor(
     private fb: FormBuilder,
@@ -38,7 +39,7 @@ export class MoneyTransferComponent implements OnInit {
     this.sendMoneyForm = this.fb.group({
       transferType: ['momo', Validators.required],
       account_issuer: ['', Validators.required],
-      account_number: ['', [Validators.required, Validators.minLength(10)]],
+      account_number: ['', [Validators.required]],
       account_name: ['', Validators.required],
       amount: ['', [Validators.required, Validators.min(1)]],
       description: ['', Validators.required],
@@ -107,17 +108,23 @@ export class MoneyTransferComponent implements OnInit {
     const number = form.get('account_number')?.value;
     const bankCode = form.get('account_issuer')?.value;
     const accountType = form.get('transferType')?.value;
-
+    this.isVerifyingAccount = true;
     try {
       const response = await this.moneyTransferService.verifyAccount(number, bankCode, accountType);
       if (response?.success && response.data.success) {
+        this.isVerifyingAccount = true;
         form.patchValue({ account_name: response.data.data });
         this.isAccountVerified = true;
+
       } else {
+
         this.showError('Account verification failed. Please check the details and try again.');
       }
     } catch (error) {
+
       this.showError('Failed to verify account. Please try again.');
+    }  finally {
+      this.isVerifyingAccount = false; // Stop the loader
     }
   }
 
