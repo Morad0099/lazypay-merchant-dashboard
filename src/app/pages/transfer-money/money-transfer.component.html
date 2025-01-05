@@ -1,310 +1,331 @@
 <!-- money-transfer.component.html -->
-<div class="money-transfer-container">
-    <!-- Header -->
-    <div class="header">
-      <div class="title-section">
-        <h1>Money Transfer</h1>
-        <p>Send money or fund your wallet</p>
-      </div>
-    </div>
-  
-    <!-- Tabs -->
-    <div class="tabs-container">
-      <button 
-        class="tab-button" 
-        [class.active]="activeTab === 'send'"
-        (click)="switchTab('send')">
-        <i class="material-icons">send</i>
-        Send Money
-      </button>
-      <button 
-        class="tab-button" 
-        [class.active]="activeTab === 'fund'"
-        (click)="switchTab('fund')">
-        <i class="material-icons">account_balance_wallet</i>
-        Fund Wallet
-      </button>
-    </div>
-  
+<div class="min-h-screen bg-gray-50">
+  <div class="max-w-4xl mx-auto p-6">
     <!-- Send Money Form -->
-    <div class="form-container" *ngIf="activeTab === 'send'">
-      <div class="form-header">
-        <h2>Send Money</h2>
-        <p>Transfer money to mobile money or bank account</p>
+    <div class="bg-white rounded-xl border shadow-1" *ngIf="activeTab === 'send'">
+      <!-- Header Section with Accent Background -->
+      <div class="p-8 bg-gradient-to-br from-blue-600 to-blue-700 rounded-t-xl">
+        <h2 class="text-2xl font-bold text-white mb-1">Send Money</h2>
+        <p class="text-blue-100">
+          Transfer money to mobile money or bank account
+        </p>
       </div>
-  
-      <form [formGroup]="sendMoneyForm" (ngSubmit)="onSendMoney()" class="transfer-form">
-        <!-- Transfer Type Selection -->
-        <div class="form-group">
-          <label>Transfer Type</label>
-          <div class="radio-group">
-            <label class="radio-label">
-              <input 
-                type="radio" 
-                formControlName="transferType" 
-                value="momo"
-                (change)="onTransferTypeChange()">
-              <span class="radio-text">Mobile Money</span>
-            </label>
-            <label class="radio-label">
-              <input 
-                type="radio" 
-                formControlName="transferType" 
-                value="bank"
-                (change)="onTransferTypeChange()">
-              <span class="radio-text">Bank Transfer</span>
-            </label>
-          </div>
-        </div>
-  
-        <!-- Mobile Money Fields -->
-        <ng-container *ngIf="sendMoneyForm.get('transferType')?.value === 'momo'">
-          <div class="form-group">
-            <label>Network Provider</label>
-            <select formControlName="account_issuer">
-              <option value="">Select Provider</option>
-              <option value="mtn">MTN Mobile Money</option>
-              <option value="vod">Vodafone Cash</option>
-              <option value="tgo">AirtelTigo Money</option>
-            </select>
-            <div class="error-message" *ngIf="sendMoneyForm.get('account_issuer')?.touched && sendMoneyForm.get('account_issuer')?.errors?.['required']">
-              Please select a provider
-            </div>
-          </div>
-        </ng-container>
-  
-        <!-- Bank Fields -->
-        <ng-container *ngIf="sendMoneyForm.get('transferType')?.value === 'bank'">
-          <div class="form-group">
-            <label>Select Bank</label>
-            <select formControlName="account_issuer">
-              <option value="">Select Bank</option>
-              <option *ngFor="let bank of banks" [value]="bank.BankCode">
-                {{bank.BankName}}
-              </option>
-            </select>
-            <div class="error-message" *ngIf="sendMoneyForm.get('account_issuer')?.touched && sendMoneyForm.get('account_issuer')?.errors?.['required']">
-              Please select a bank
-            </div>
-          </div>
-        </ng-container>
 
-        <div *ngIf="isVerifyingAccount" class="loader-overlay">
-          <div class="loader"></div>
-        </div>
-  
-        <!-- Common Fields -->
-        <div class="form-group">
-          <label>Account Number</label>
-          <div class="input-group">
-            <input 
-              type="text" 
-              formControlName="account_number"
-              placeholder="Enter account number">
-            <button 
-              type="button"
-              class="verify-btn"
-              [disabled]="!canVerify"
-              (click)="verifyAccount()">
-              <i class="material-icons">verified</i>
-              Verify
-            </button>
-          </div>
-          <div class="error-message" *ngIf="sendMoneyForm.get('account_number')?.touched && sendMoneyForm.get('account_number')?.errors?.['required']">
-            Account number is required
-          </div>
-          <div class="error-message" *ngIf="sendMoneyForm.get('account_number')?.touched && sendMoneyForm.get('account_number')?.errors?.['minlength']">
-            Please enter a valid account number
-          </div>
-        </div>
-  
-        <div class="form-group">
-          <label>Account Name</label>
-          <input 
-            type="text" 
-            formControlName="account_name"
-            readonly
-            [class.verified]="isAccountVerified">
-        </div>
-  
-        <div class="form-group">
-          <label>Amount (GHS)</label>
-          <input 
-            type="number" 
-            formControlName="amount"
-            min="1"
-            placeholder="Enter amount">
-          <div class="error-message" *ngIf="sendMoneyForm.get('amount')?.touched && sendMoneyForm.get('amount')?.errors?.['required']">
-            Amount is required
-          </div>
-          <div class="error-message" *ngIf="sendMoneyForm.get('amount')?.touched && sendMoneyForm.get('amount')?.errors?.['min']">
-            Amount must be greater than 0
+      <form [formGroup]="sendMoneyForm" (ngSubmit)="onSendMoney()" class="p-8">
+        <!-- Transfer Type Selection with Custom Radio Buttons -->
+        <div class="mb-8">
+          <label class="block text-sm font-semibold text-gray-700 mb-3"
+            >Transfer Type</label
+          >
+          <div class="grid grid-cols-2 gap-4">
+            <label class="relative">
+              <input
+                type="radio"
+                formControlName="transferType"
+                value="momo"
+                class="peer sr-only"
+                (change)="onTransferTypeChange()"
+              />
+              <div
+                class="p-4 border-2 rounded-xl cursor-pointer flex items-center gap-3 peer-checked:border-blue-500 peer-checked:bg-blue-50 hover:border-blue-200"
+              >
+                <div
+                  class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600"
+                >
+                  <i class="material-icons">smartphone</i>
+                </div>
+                <span class="font-medium text-gray-700">Mobile Money</span>
+              </div>
+            </label>
+            <label class="relative">
+              <input
+                type="radio"
+                formControlName="transferType"
+                value="bank"
+                class="peer sr-only"
+                (change)="onTransferTypeChange()"
+              />
+              <div
+                class="p-4 border-2 rounded-xl cursor-pointer flex items-center gap-3 peer-checked:border-blue-500 peer-checked:bg-blue-50 hover:border-blue-200"
+              >
+                <div
+                  class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600"
+                >
+                  <i class="material-icons">account_balance</i>
+                </div>
+                <span class="font-medium text-gray-700">Bank Transfer</span>
+              </div>
+            </label>
           </div>
         </div>
-  
-        <div class="form-group">
-          <label>Description</label>
-          <textarea 
-            formControlName="description"
-            rows="2"
-            placeholder="Enter transfer description"></textarea>
-          <div class="error-message" *ngIf="sendMoneyForm.get('description')?.touched && sendMoneyForm.get('description')?.errors?.['required']">
-            Description is required
-          </div>
-        </div>
-  
-        <!-- OTP Section -->
-        <ng-container *ngIf="showOtpSection">
-          <div class="otp-section">
+
+        <!-- Network/Bank Selection -->
+        <div class="space-y-6">
+          <ng-container
+            *ngIf="sendMoneyForm.get('transferType')?.value === 'momo'"
+          >
             <div class="form-group">
-              <label>Enter OTP</label>
-              <div class="input-group">
-                <input 
-                  type="text" 
+              <label class="block text-sm font-semibold text-gray-700 mb-2"
+                >Network Provider</label
+              >
+              <div class="relative">
+                <select
+                  formControlName="account_issuer"
+                  class="w-full bg-gray-50 border-2 border-gray-200 rounded-xl px-4 h-14 appearance-none focus:outline-none focus:border-blue-500 focus:bg-white transition-colors"
+                >
+                  <option value="">Select Provider</option>
+                  <option value="mtn" class="py-2">MTN Mobile Money</option>
+                  <option value="vodafone" class="py-2">Vodafone Cash</option>
+                  <option value="airteltigo" class="py-2">
+                    AirtelTigo Money
+                  </option>
+                </select>
+                <i class="material-icons absolute right-4 top-4 text-gray-400"
+                  >expand_more</i
+                >
+              </div>
+              <p
+                class="mt-2 text-sm text-red-500"
+                *ngIf="sendMoneyForm.get('account_issuer')?.touched && sendMoneyForm.get('account_issuer')?.errors?.['required']"
+              >
+                Please select a provider
+              </p>
+            </div>
+          </ng-container>
+
+          <ng-container
+            *ngIf="sendMoneyForm.get('transferType')?.value === 'bank'"
+          >
+            <div class="form-group">
+              <label class="block text-sm font-semibold text-gray-700 mb-2"
+                >Select Bank</label
+              >
+              <div class="relative">
+                <select
+                  formControlName="account_issuer"
+                  class="w-full bg-gray-50 border-2 border-gray-200 rounded-xl px-4 h-14 appearance-none focus:outline-none focus:border-blue-500 focus:bg-white transition-colors"
+                >
+                  <option value="">Select Bank</option>
+                  <option
+                    *ngFor="let bank of banks"
+                    [value]="bank.BankCode"
+                    class="py-2"
+                  >
+                    {{ bank.BankName }}
+                  </option>
+                </select>
+                <i class="material-icons absolute right-4 top-4 text-gray-400"
+                  >expand_more</i
+                >
+              </div>
+              <p
+                class="mt-2 text-sm text-red-500"
+                *ngIf="sendMoneyForm.get('account_issuer')?.touched && sendMoneyForm.get('account_issuer')?.errors?.['required']"
+              >
+                Please select a bank
+              </p>
+            </div>
+          </ng-container>
+
+          <!-- Account Details Section -->
+          <div class="bg-gray-50 p-6 rounded-xl space-y-6">
+            <div class="form-group">
+              <label class="block text-sm font-semibold text-gray-700 mb-2"
+                >Account Number</label
+              >
+              <div class="flex gap-3">
+                <input
+                  type="text"
+                  formControlName="account_number"
+                  class="flex-1 h-14 px-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500"
+                  placeholder="Enter account number"
+                />
+                <button
+                  type="button"
+                  [disabled]="!canVerify || isVerifyingAccount"
+                  (click)="verifyAccount()"
+                  class="px-6 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 min-w-[120px] justify-center h-14"
+                >
+                  <ng-container *ngIf="!isVerifyingAccount">
+                    <i class="material-icons text-sm">verified</i>
+                    Verify
+                  </ng-container>
+                  <ng-container *ngIf="isVerifyingAccount">
+                    <div
+                      class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"
+                    ></div>
+                    Verifying...
+                  </ng-container>
+                </button>
+              </div>
+              <p
+                class="mt-2 text-sm text-red-500"
+                *ngIf="sendMoneyForm.get('account_number')?.touched && sendMoneyForm.get('account_number')?.errors?.['required']"
+              >
+                Account number is required
+              </p>
+            </div>
+
+            <div class="form-group">
+              <label class="block text-sm font-semibold text-gray-700 mb-2"
+                >Account Name</label
+              >
+              <input
+                type="text"
+                formControlName="account_name"
+                readonly
+                class="w-full h-14 px-4 bg-gray-100 border-2 rounded-xl"
+                [class.border-green-500]="isAccountVerified"
+                [class.border-gray-200]="!isAccountVerified"
+              />
+            </div>
+          </div>
+
+          <!-- Amount and Description -->
+          <div class="form-group">
+            <label class="block text-sm font-semibold text-gray-700 mb-2"
+              >Amount (GHS)</label
+            >
+            <div class="relative">
+              <span class="absolute left-4 top-4 text-gray-500">GHS</span>
+              <input
+                type="number"
+                formControlName="amount"
+                min="1"
+                class="w-full h-14 pl-14 pr-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500"
+                placeholder="0.00"
+              />
+            </div>
+            <p
+              class="mt-2 text-sm text-red-500"
+              *ngIf="sendMoneyForm.get('amount')?.touched && sendMoneyForm.get('amount')?.errors?.['required']"
+            >
+              Amount is required
+            </p>
+          </div>
+
+          <div class="form-group">
+            <label class="block text-sm font-semibold text-gray-700 mb-2"
+              >Description</label
+            >
+            <textarea
+              formControlName="description"
+              rows="3"
+              class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 resize-none"
+              placeholder="What's this payment for?"
+            ></textarea>
+            <p
+              class="mt-2 text-sm text-red-500"
+              *ngIf="sendMoneyForm.get('description')?.touched && sendMoneyForm.get('description')?.errors?.['required']"
+            >
+              Description is required
+            </p>
+          </div>
+
+          <!-- OTP Section -->
+          <ng-container *ngIf="showOtpSection">
+            <div
+              class="bg-blue-50 p-6 rounded-xl space-y-3 border-2 border-blue-100"
+            >
+              <label class="block text-sm font-semibold text-gray-700"
+                >Enter OTP</label
+              >
+              <div class="flex gap-3">
+                <input
+                  type="text"
                   formControlName="otp"
                   maxlength="5"
-                  placeholder="Enter OTP code">
-                <button 
+                  class="flex-1 h-14 px-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500"
+                  placeholder="Enter OTP code"
+                />
+                <button
                   type="button"
-                  class="resend-btn"
-                  (click)="resendOtp()">
+                  (click)="resendOtp()"
+                  class="px-6 text-blue-600 hover:bg-blue-100 rounded-xl transition-colors"
+                >
                   Resend OTP
                 </button>
               </div>
             </div>
-          </div>
-        </ng-container>
-  
+          </ng-container>
+        </div>
+
         <!-- Action Buttons -->
-        <div class="form-actions">
-          <button 
-            type="button" 
-            class="request-otp-btn"
+        <div class="mt-8 flex justify-end gap-4">
+          <button
+            type="button"
             *ngIf="!showOtpSection && isAccountVerified"
-            (click)="requestOtp()">
-            <i class="material-icons">sms</i>
-            Request OTP
+            (click)="requestOtp()"
+            [disabled]="isSendingOtp"
+            class="h-14 px-8 bg-gray-800 text-white rounded-xl hover:bg-gray-900 flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed min-w-[160px] justify-center"
+          >
+            <ng-container *ngIf="!isSendingOtp">
+              <i class="material-icons text-sm">sms</i>
+              Request OTP
+            </ng-container>
+            <ng-container *ngIf="isSendingOtp">
+              <div
+                class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"
+              ></div>
+              Sending...
+            </ng-container>
           </button>
-  
-          <button 
-            type="submit" 
-            class="submit-btn"
+
+          <button
+            type="submit"
             *ngIf="showOtpSection"
-            [disabled]="!sendMoneyForm.valid || isSubmitting">
-            <i class="material-icons">send</i>
-            {{ isSubmitting ? 'Processing...' : 'Send Money' }}
+            [disabled]="!sendMoneyForm.valid || isSubmitting"
+            class="h-14 px-8 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            <i class="material-icons text-sm">send</i>
+            {{ isSubmitting ? "Processing..." : "Send Money" }}
           </button>
         </div>
       </form>
     </div>
-  
-    <!-- Fund Wallet Form -->
-    <div class="form-container" *ngIf="activeTab === 'fund'">
-      <div class="form-header">
-        <h2>Fund Wallet</h2>
-        <p>Add money to your wallet via mobile money</p>
-      </div>
-  
-      <form [formGroup]="fundWalletForm" (ngSubmit)="onFundWallet()" class="transfer-form">
-        <div class="form-group">
-          <label>Payment Method</label>
-          <select formControlName="account_issuer">
-            <option value="mtn">MTN Mobile Money</option>
-            <option value="vod">Vodafone Cash</option>
-            <option value="tgo">AirtelTigo Money</option>
-          </select>
-        </div>
-  
-        <div class="form-group">
-          <label>Mobile Number</label>
-          <input 
-            type="text" 
-            formControlName="account_number"
-            [maxLength]="10"
-            placeholder="Enter mobile number">
-          <div class="error-message" *ngIf="fundWalletForm.get('account_number')?.touched && fundWalletForm.get('account_number')?.errors?.['required']">
-            Mobile number is required
-          </div>
-          <div class="error-message" *ngIf="fundWalletForm.get('account_number')?.touched && fundWalletForm.get('account_number')?.errors?.['minlength']">
-            Please enter a valid mobile number
-          </div>
-        </div>
-  
-        <div class="form-group">
-          <label>Amount (GHS)</label>
-          <input 
-            type="number" 
-            formControlName="amount"
-            min="1"
-            placeholder="Enter amount">
-          <div class="error-message" *ngIf="fundWalletForm.get('amount')?.touched && fundWalletForm.get('amount')?.errors?.['required']">
-            Amount is required
-          </div>
-          <div class="error-message" *ngIf="fundWalletForm.get('amount')?.touched && fundWalletForm.get('amount')?.errors?.['min']">
-            Amount must be greater than 0
-          </div>
-        </div>
-  
-        <!-- OTP Section -->
-        <ng-container *ngIf="showFundWalletOtp">
-          <div class="otp-section">
-            <div class="form-group">
-              <label>Enter OTP</label>
-              <div class="input-group">
-                <input 
-                  type="text" 
-                  formControlName="otp"
-                  maxlength="5"
-                  placeholder="Enter OTP code">
-                <button 
-                  type="button"
-                  class="resend-btn"
-                  (click)="resendFundWalletOtp()">
-                  Resend OTP
-                </button>
-              </div>
-            </div>
-          </div>
-        </ng-container>
-  
-        <!-- Action Buttons -->
-        <div class="form-actions">
-          <button 
-            type="button" 
-            class="request-otp-btn"
-            *ngIf="!showFundWalletOtp"
-            (click)="requestFundWalletOtp()">
-            <i class="material-icons">sms</i>
-            Request OTP
-          </button>
-  
-          <button 
-            type="submit" 
-            class="submit-btn"
-            *ngIf="showFundWalletOtp"
-            [disabled]="!fundWalletForm.valid || isSubmitting">
-            <i class="material-icons">account_balance_wallet</i>
-            {{ isSubmitting ? 'Processing...' : 'Fund Wallet' }}
-          </button>
-        </div>
-      </form>
-    </div>
-  
+
     <!-- Success Modal -->
-    <div class="modal" *ngIf="showSuccessModal">
-      <div class="modal-content success">
-        <i class="material-icons">check_circle</i>
-        <h3>{{successMessage}}</h3>
-        <button (click)="closeSuccessModal()">Close</button>
+    <div
+      class="fixed inset-0 bg-black/50 flex items-center justify-center p-4"
+      *ngIf="showSuccessModal"
+    >
+      <div class="bg-white rounded-xl max-w-sm w-full p-6">
+        <div class="text-center">
+          <i class="material-icons text-5xl text-green-500 mb-4"
+            >check_circle</i
+          >
+          <h3 class="text-xl font-semibold text-gray-800 mb-6">
+            {{ successMessage }}
+          </h3>
+          <button
+            (click)="closeSuccessModal()"
+            class="w-full px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700"
+          >
+            Close
+          </button>
+        </div>
       </div>
     </div>
-  
+
     <!-- Error Modal -->
-    <div class="modal" *ngIf="showErrorModal">
-      <div class="modal-content error">
-        <i class="material-icons">error</i>
-        <h3>{{errorMessage}}</h3>
-        <button (click)="closeErrorModal()">Close</button>
+    <div
+      class="fixed inset-0 bg-black/50 flex items-center justify-center p-4"
+      *ngIf="showErrorModal"
+    >
+      <div class="bg-white rounded-xl max-w-sm w-full p-6">
+        <div class="text-center">
+          <i class="material-icons text-5xl text-red-500 mb-4">error</i>
+          <h3 class="text-xl font-semibold text-gray-800 mb-6">
+            {{ errorMessage }}
+          </h3>
+          <button
+            (click)="closeErrorModal()"
+            class="w-full px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700"
+          >
+            Close
+          </button>
+        </div>
       </div>
     </div>
   </div>
+</div>

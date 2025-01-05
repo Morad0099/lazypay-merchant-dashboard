@@ -1,16 +1,21 @@
-import { CommonModule } from "@angular/common";
-import { Component, OnInit } from "@angular/core";
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
-import { Store } from "@ngxs/store";
-import { MoneyTransferService } from "./money-transfer.service";
-import { Bank } from "./money-transfer.types";
+import { CommonModule } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+import { Store } from '@ngxs/store';
+import { MoneyTransferService } from './money-transfer.service';
+import { Bank } from './money-transfer.types';
 
 @Component({
   selector: 'app-money-transfer',
   standalone: true,
   imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './money-transfer.component.html',
-  styleUrls: ['./money-transfer.component.scss']
+  styleUrls: ['./money-transfer.component.scss'],
 })
 export class MoneyTransferComponent implements OnInit {
   activeTab: 'send' | 'fund' = 'send';
@@ -26,6 +31,7 @@ export class MoneyTransferComponent implements OnInit {
   successMessage = '';
   errorMessage = '';
   isVerifyingAccount = false;
+  isSendingOtp: boolean = false;
 
   constructor(
     private fb: FormBuilder,
@@ -43,14 +49,14 @@ export class MoneyTransferComponent implements OnInit {
       account_name: ['', Validators.required],
       amount: ['', [Validators.required, Validators.min(1)]],
       description: ['', Validators.required],
-      otp: ['']
+      otp: [''],
     });
 
     this.fundWalletForm = this.fb.group({
       account_issuer: ['mtn', Validators.required],
       account_number: ['', [Validators.required, Validators.minLength(10)]],
       amount: ['', [Validators.required, Validators.min(1)]],
-      otp: ['']
+      otp: [''],
     });
   }
 
@@ -92,7 +98,7 @@ export class MoneyTransferComponent implements OnInit {
     this.sendMoneyForm.patchValue({
       account_issuer: '',
       account_number: '',
-      account_name: ''
+      account_name: '',
     });
     this.isAccountVerified = false;
     this.showOtpSection = false;
@@ -100,7 +106,9 @@ export class MoneyTransferComponent implements OnInit {
 
   get canVerify(): boolean {
     const form = this.sendMoneyForm;
-    return form.get('account_number')!.valid && form.get('account_issuer')!.valid;
+    return (
+      form.get('account_number')!.valid && form.get('account_issuer')!.valid
+    );
   }
 
   async verifyAccount() {
@@ -110,30 +118,41 @@ export class MoneyTransferComponent implements OnInit {
     const accountType = form.get('transferType')?.value;
     this.isVerifyingAccount = true;
     try {
-      const response = await this.moneyTransferService.verifyAccount(number, bankCode, accountType);
+      const response = await this.moneyTransferService.verifyAccount(
+        number,
+        bankCode,
+        accountType
+      );
       if (response?.success && response.data.success) {
         this.isVerifyingAccount = true;
         form.patchValue({ account_name: response.data.data });
         this.isAccountVerified = true;
-
       } else {
-
-        this.showError('Account verification failed. Please check the details and try again.');
+        this.showError(
+          'Account verification failed. Please check the details and try again.'
+        );
       }
     } catch (error) {
-
       this.showError('Failed to verify account. Please try again.');
-    }  finally {
+    } finally {
       this.isVerifyingAccount = false; // Stop the loader
     }
   }
 
   async requestOtp() {
-    const userEmail = this.store.selectSnapshot(state => state.auth.user?.email);
-    const userPhone = this.store.selectSnapshot(state => state.auth.user?.phone);
+    const userEmail = this.store.selectSnapshot(
+      (state) => state.auth.user?.email
+    );
+    const userPhone = this.store.selectSnapshot(
+      (state) => state.auth.user?.phone
+    );
 
     try {
-      const response = await this.moneyTransferService.sendOtp(userEmail, userPhone);
+      this.isSendingOtp = true;
+      const response = await this.moneyTransferService.sendOtp(
+        userEmail,
+        userPhone
+      );
       if (response?.success) {
         this.showOtpSection = true;
       } else {
@@ -141,6 +160,8 @@ export class MoneyTransferComponent implements OnInit {
       }
     } catch (error) {
       this.showError('Failed to send OTP. Please try again.');
+    } finally {
+      this.isSendingOtp = false;
     }
   }
 
@@ -153,8 +174,12 @@ export class MoneyTransferComponent implements OnInit {
 
     this.isSubmitting = true;
     const form = this.sendMoneyForm.value;
-    const userId = this.store.selectSnapshot(state => state.auth.user?.merchantId._id);
-    const initateId = this.store.selectSnapshot(state => state.auth.user?._id);
+    const userId = this.store.selectSnapshot(
+      (state) => state.auth.user?.merchantId._id
+    );
+    const initateId = this.store.selectSnapshot(
+      (state) => state.auth.user?._id
+    );
     try {
       const payload = {
         account_issuer: form.account_issuer,
@@ -167,7 +192,7 @@ export class MoneyTransferComponent implements OnInit {
         description: form.description,
         initiatedBy: initateId,
         otp: form.otp,
-        serviceName: 'banktrf'
+        serviceName: 'banktrf',
       };
 
       const response = await this.moneyTransferService.sendMoney(payload);
@@ -175,21 +200,30 @@ export class MoneyTransferComponent implements OnInit {
         this.showSuccess('Money sent successfully!');
         this.resetForms();
       } else {
-        this.showError(response?.message || 'Failed to send money. Please try again.');
+        this.showError(
+          response?.message || 'Failed to send money. Please try again.'
+        );
       }
     } catch (error: any) {
-      this.showError(error?.error?.message || 'Failed to send money. Please try again.');
+      this.showError(
+        error?.error?.message || 'Failed to send money. Please try again.'
+      );
     } finally {
       this.isSubmitting = false;
     }
   }
 
   async requestFundWalletOtp() {
-    const userEmail = this.store.selectSnapshot(state => state.auth.user?.email);
+    const userEmail = this.store.selectSnapshot(
+      (state) => state.auth.user?.email
+    );
     const userPhone = this.fundWalletForm.get('account_number')?.value;
 
     try {
-      const response = await this.moneyTransferService.sendOtp(userEmail, userPhone);
+      const response = await this.moneyTransferService.sendOtp(
+        userEmail,
+        userPhone
+      );
       if (response?.success) {
         this.showFundWalletOtp = true;
       } else {
@@ -209,7 +243,9 @@ export class MoneyTransferComponent implements OnInit {
 
     this.isSubmitting = true;
     const form = this.fundWalletForm.value;
-    const userId = this.store.selectSnapshot(state => state.auth.user?.merchantId._id);
+    const userId = this.store.selectSnapshot(
+      (state) => state.auth.user?.merchantId._id
+    );
 
     try {
       const payload = {
@@ -218,7 +254,7 @@ export class MoneyTransferComponent implements OnInit {
         amount: form.amount.toString(),
         customerId: userId,
         customerType: 'merchants',
-        otp: form.otp
+        otp: form.otp,
       };
 
       const response = await this.moneyTransferService.fundWallet(payload);
@@ -226,10 +262,14 @@ export class MoneyTransferComponent implements OnInit {
         this.showSuccess('Wallet funded successfully!');
         this.resetForms();
       } else {
-        this.showError(response?.message || 'Failed to fund wallet. Please try again.');
+        this.showError(
+          response?.message || 'Failed to fund wallet. Please try again.'
+        );
       }
     } catch (error: any) {
-      this.showError(error?.error?.message || 'Failed to fund wallet. Please try again.');
+      this.showError(
+        error?.error?.message || 'Failed to fund wallet. Please try again.'
+      );
     } finally {
       this.isSubmitting = false;
     }

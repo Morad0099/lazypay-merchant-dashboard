@@ -431,6 +431,7 @@ export class TransactionTableComponent implements OnInit {
   }
 
   openTransactionModal(transaction: ApiTransaction): void {
+    console.log(transaction);
     this.selectedTransaction = transaction;
     this.showModal = true;
   }

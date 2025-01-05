@@ -1,5 +1,5 @@
 import { ApplicationConfig, importProvidersFrom } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { provideRouter, withHashLocation } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { routes } from './app.routes';
 import { NgxsModule } from '@ngxs/store';
@@ -11,15 +11,13 @@ import { provideAnimations } from '@angular/platform-browser/animations';
 
 export const appConfig: ApplicationConfig = {
   providers: [
-    provideRouter(routes),
-    provideHttpClient(
-      withInterceptors([authInterceptor])
-    ),
+    provideRouter(routes, withHashLocation()), // Add withHashLocation here
+    provideHttpClient(withInterceptors([authInterceptor])),
     importProvidersFrom(
       NgxsModule.forRoot([AuthState]),
       NgxsLoggerPluginModule.forRoot(),
       NgxsReduxDevtoolsPluginModule.forRoot()
     ),
-    provideAnimations()
-  ]
+    provideAnimations(),
+  ],
 };
