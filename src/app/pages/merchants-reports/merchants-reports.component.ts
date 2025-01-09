@@ -291,6 +291,8 @@ interface ReportResponse {
                       <option value="">All Types</option>
                       <option value="DEBIT">Debit</option>
                       <option value="CREDIT">Credit</option>
+                      <option value="REVERSAL">Reversal</option>
+                      
                     </select>
                   </div>
                 </div>
