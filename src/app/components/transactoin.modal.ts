@@ -154,13 +154,13 @@ import { ApiTransaction } from '../types';
                     {{ transaction?.charges | number : '1.2-2' }}
                   </span>
                 </div>
-                <div class="flex justify-between">
+                <!-- <div class="flex justify-between">
                   <span class="text-gray-600">Profit</span>
                   <span class="font-medium text-blue-600">
                     {{ transaction?.currency }}
                     {{ transaction?.profitEarned | number : '1.2-2' }}
                   </span>
-                </div>
+                </div> -->
               </div>
             </div>
           </div>

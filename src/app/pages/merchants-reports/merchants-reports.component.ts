@@ -148,14 +148,95 @@ interface ReportResponse {
             </select>
           </div>
 
-          <div class="filter-group">
-            <label>Transaction Type</label>
-            <select [(ngModel)]="filters.transaction_type">
-              <option value="">All Types</option>
-              <option value="DEBIT">Debit</option>
-              <option value="CREDIT">Credit</option>
-              <option value="REVERSAL">Reversal</option>
-            </select>
+          <!-- Advanced Filters -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Left Column -->
+            <div class="space-y-1">
+              <div class="bg-gray-50 p-3 rounded-lg">
+                <label class="block text-base font-semibold text-gray-900 mb-2"
+                  >Date Range</label
+                >
+                <div class="grid grid-cols-2 gap-4">
+                  <div class="relative">
+                    <div
+                      class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"
+                    >
+                      <i class="material-icons text-gray-400 text-xl"
+                        >calendar_today</i
+                      >
+                    </div>
+                    <input
+                      type="date"
+                      [(ngModel)]="filters.startDate"
+                      [max]="filters.endDate"
+                      class="block w-full pl-12 pr-4 py-3.5 bg-white border border-gray-200 rounded-lg text-base focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
+                    />
+                  </div>
+                  <div class="relative">
+                    <div
+                      class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"
+                    >
+                      <i class="material-icons text-gray-400 text-xl"
+                        >calendar_today</i
+                      >
+                    </div>
+                    <input
+                      type="date"
+                      [(ngModel)]="filters.endDate"
+                      [min]="filters.startDate"
+                      class="block w-full pl-12 pr-4 py-3.5 bg-white border border-gray-200 rounded-lg text-base focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="space-y-1">
+              <div class="bg-gray-50 p-3 rounded-lg">
+                <label class="block text-base font-semibold text-gray-900 mb-2"
+                  >Transaction Filters</label
+                >
+                <div class="grid grid-cols-2 gap-4">
+                  <div class="relative">
+                    <div
+                      class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"
+                    >
+                      <i class="material-icons text-gray-400 text-xl">flag</i>
+                    </div>
+                    <select
+                      [(ngModel)]="filters.status"
+                      class="block w-full pl-12 pr-4 py-3.5 bg-white border border-gray-200 rounded-lg text-base focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all appearance-none"
+                    >
+                      <option value="">All Status</option>
+                      <option value="PAID">Paid</option>
+                      <option value="PENDING">Pending</option>
+                      <option value="FAILED">Failed</option>
+                    </select>
+                  </div>
+                  <div class="relative">
+                    <div
+                      class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"
+                    >
+                      <i class="material-icons text-gray-400 text-xl"
+                        >sync_alt</i
+                      >
+                    </div>
+                    <select
+                      [(ngModel)]="filters.transaction_type"
+                      class="block w-full pl-12 pr-4 py-3.5 bg-white border border-gray-200 rounded-lg text-base focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all appearance-none"
+                    >
+                      <option value="">All Types</option>
+                      <option value="DEBIT">Debit</option>
+                      <option value="CREDIT">Credit</option>
+                      <option value="REVERSAL">Reversal</option>
+                      
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
 
