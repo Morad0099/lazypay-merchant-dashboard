@@ -299,7 +299,7 @@ export class TransactionsMerchantComponent implements OnInit {
     this.loading = true;
     this.error = '';
     
-    this.http.get<APIResponse>(`https://lazypaygh.com/api/transactions/pending?id=${this.appId}`, {
+    this.http.get<APIResponse>(`https://doronpay.com/api/transactions/pending?id=${this.appId}`, {
       headers: this.getHeaders()
     }).subscribe({
       next: (response) => {

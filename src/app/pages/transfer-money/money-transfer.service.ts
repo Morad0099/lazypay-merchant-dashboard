@@ -8,18 +8,20 @@ import {
   OtpResponse, 
   TransactionResponse,
   SendMoneyPayload,
-  FundWalletPayload 
+  FundWalletPayload,
 } from './money-transfer.types';
+import url from '../../constants/api.constant';
 
 @Injectable({
   providedIn: 'root'
 })
 export class MoneyTransferService {
-  private readonly API_BASE = 'https://lazypaygh.com/api';
+  private readonly API_BASE = url;
 
   constructor(
     private http: HttpClient,
-    private store: Store
+    private store: Store,
+  
   ) {}
 
   private getHeaders(): HttpHeaders {

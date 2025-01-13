@@ -288,7 +288,7 @@ export class MerchantProfileComponent implements OnInit {
 
     this.loading = true;
     this.http
-      .get<any>(`https://lazypaygh.com/api/merchants/get/${merchantId}`, {
+      .get<any>(`https://doronpay.com/api/merchants/get/${merchantId}`, {
         headers: this.getHeaders(),
       })
       .subscribe({
@@ -328,7 +328,7 @@ export class MerchantProfileComponent implements OnInit {
     if (!merchantId) return;
 
     this.http
-      .get<any>(`https://lazypaygh.com/api/documents/get/${merchantId}`, {
+      .get<any>(`https://doronpay.com/api/documents/get/${merchantId}`, {
         headers: this.getHeaders(),
       })
       .subscribe({
