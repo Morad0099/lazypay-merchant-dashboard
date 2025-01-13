@@ -236,7 +236,7 @@ export class UsersComponent implements OnInit {
     if (!merchantId) return;
 
     this.loading = true;
-    this.http.get<any>(`https://lazypaygh.com/api/merchants/roles/get/${merchantId}`, {
+    this.http.get<any>(`https://doronpay.com/api/merchants/roles/get/${merchantId}`, {
       headers: this.getHeaders()
     }).subscribe({
       next: (response) => {
@@ -258,7 +258,7 @@ export class UsersComponent implements OnInit {
     event.preventDefault();
     this.isSubmitting = true;
 
-    this.http.post<any>('https://lazypaygh.com/api/merchants/roles/add', this.newUser, {
+    this.http.post<any>('https://doronpay.com/api/merchants/roles/add', this.newUser, {
       headers: this.getHeaders()
     }).subscribe({
       next: (response) => {
@@ -303,7 +303,7 @@ export class UsersComponent implements OnInit {
       }
     };
 
-    this.http.put<any>('https://lazypaygh.com/api/merchants/roles/update', payload, {
+    this.http.put<any>('https://doronpay.com/api/merchants/roles/update', payload, {
       headers: this.getHeaders()
     }).subscribe({
       next: (response) => {

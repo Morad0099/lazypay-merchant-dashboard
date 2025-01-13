@@ -524,7 +524,7 @@ export class UserMerchantsComponent implements OnInit {
   async viewDocuments(merchant: Merchant) {
     try {
       const response = await this.http
-        .get<any>(`https://lazypaygh.com/api/documents/get/${merchant._id}`, {
+        .get<any>(`https://doronpay.com/api/documents/get/${merchant._id}`, {
           headers: this.getHeaders(),
         })
         .toPromise();
@@ -546,7 +546,7 @@ export class UserMerchantsComponent implements OnInit {
     try {
       const response = await this.http
         .put<any>(
-          'https://lazypaygh.com/api/merchants/update',
+          'https://doronpay.com/api/merchants/update',
           {
             id: merchant._id,
             data: {
@@ -574,8 +574,8 @@ export class UserMerchantsComponent implements OnInit {
 
     const endpoint =
       action === 'approve'
-        ? 'https://lazypaygh.com/api/merchants/approve'
-        : 'https://lazypaygh.com/api/merchants/deactivate';
+        ? 'https://doronpay.com/api/merchants/approve'
+        : 'https://doronpay.com/api/merchants/deactivate';
 
     try {
       const response = await this.http
@@ -616,7 +616,7 @@ export class UserMerchantsComponent implements OnInit {
     this.loading = true;
     this.http
       .get<any>(
-        `https://lazypaygh.com/api/merchants/onboardedby/${merchantId}`,
+        `https://doronpay.com/api/merchants/onboardedby/${merchantId}`,
         {
           headers: this.getHeaders(),
         }
@@ -672,7 +672,7 @@ export class UserMerchantsComponent implements OnInit {
     try {
       const response = await this.http
         .post<any>(
-          'https://lazypaygh.com/api/merchants/onboard',
+          'https://doronpay.com/api/merchants/onboard',
           this.newMerchant,
           { headers: this.getHeaders() }
         )

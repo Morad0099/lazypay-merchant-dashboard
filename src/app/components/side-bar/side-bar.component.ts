@@ -20,6 +20,7 @@ export const Routes: RouteInfo[] = [
   { path: 'reports', title: 'Reports', class: 'false' },
   { path: 'settlements', title: 'Settlements', class: 'false' },
   { path: 'transfer', title: 'Transfer', class: 'false' },
+  { path: 'transaction', title: 'Transaction Filters', class: 'false' }
 ];
 
 @Component({
@@ -96,6 +97,7 @@ export class SidebarComponent implements OnInit {
       'reports': 'bi bi-file-earmark-text',
       'settlements': 'bi bi-cash',
       'transfer': 'bi bi-currency-exchange',
+      'transaction': 'bi bi-filter',
     // 'dashboard': 'bi bi-bar-chart',
     };
 

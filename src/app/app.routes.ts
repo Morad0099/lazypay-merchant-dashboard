@@ -9,6 +9,7 @@ import { UserMerchantsComponent } from './pages/merchant-users/user-merchants.co
 import { ReportsComponent } from './pages/merchants-reports/merchants-reports.component';
 import { SettlementsComponent } from './pages/merchant-settlements/merchant-settlements.component';
 import { MoneyTransferComponent } from './pages/transfer-money/money-transfer.component';
+import { TransactionDetailsComponent } from './pages/transactions/transaction-details.component';
 
 export const routes: Routes = [
   {
@@ -82,6 +83,10 @@ export const routes: Routes = [
       {
         path: 'merchants/settlements/:id',
         component: MerchantSettlementsComponent,
+      },
+      {
+        path: 'transaction',
+        component: TransactionDetailsComponent,
       },
       // Add other child routes here
       { path: '', redirectTo: 'payment-reconciliation', pathMatch: 'full' },
