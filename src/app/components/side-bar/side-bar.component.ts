@@ -14,6 +14,8 @@ export interface RouteInfo {
 export const Routes: RouteInfo[] = [
   { path: 'payment-reconciliation', title: 'Payment Reconciliation', class: 'red' },
   { path: 'hub', title: 'Hub', class: 'false' },
+  { path: 'wallets', title: 'Wallets', class: 'false' },
+
   { path: 'profile', title: 'Profile', class: 'false'},
   { path: 'users', title: 'Users', class: 'false' },
   // { path: 'mechant', title: 'Merchant', class: 'false' },
@@ -93,6 +95,8 @@ export class SidebarComponent implements OnInit {
       'hub': 'bi bi-bar-chart',
       'profile': 'bi bi-person',
       'users': 'bi bi-people',
+      'wallets': 'bi bi-wallet',
+
       // 'mechant': 'bi bi-shop',
       'reports': 'bi bi-file-earmark-text',
       'settlements': 'bi bi-cash',

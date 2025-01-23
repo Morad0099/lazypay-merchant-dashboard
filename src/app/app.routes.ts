@@ -10,6 +10,7 @@ import { ReportsComponent } from './pages/merchants-reports/merchants-reports.co
 import { SettlementsComponent } from './pages/merchant-settlements/merchant-settlements.component';
 import { MoneyTransferComponent } from './pages/transfer-money/money-transfer.component';
 import { TransactionDetailsComponent } from './pages/transactions/transaction-details.component';
+import { MerchantWalletsComponent } from './pages/merchant-wallets/merchant-wallets.component';
 
 export const routes: Routes = [
   {
@@ -56,6 +57,10 @@ export const routes: Routes = [
       {
         path: 'transfer',
         component: MoneyTransferComponent,
+      },
+      {
+        path: 'wallets',
+        component: MerchantWalletsComponent,
       },
       {
         path: 'admins',

@@ -91,7 +91,7 @@ export class HubDashboardComponent implements OnInit {
       if (user?.merchantId?._id) {
         this.merchantId = user.merchantId._id;
         this.fetchApps(this.merchantId);
-        this.fetchBalance(this.merchantId);
+        // this.fetchBalance(this.merchantId);
         this.merchantname = user.merchantId.merchant_tradeName;
       }
     });
@@ -133,20 +133,20 @@ export class HubDashboardComponent implements OnInit {
     });
   }
 
-  fetchBalance(merchantId: string) {
-    this.http.get<any>(`https://doronpay.com/api/accounts/merchant/${merchantId}`, {
-      headers: this.getHeaders()
-    }).subscribe({
-      next: (response) => {
-        if (response.success && response.data) {
-          this.balance = response.data;
-        }
-      },
-      error: (err) => {
-        alert('Failed to fetch balance');
-      }
-    });
-  }
+  // fetchBalance(merchantId: string) {
+  //   this.http.get<any>(`https://doronpay.com/api/accounts/merchant/${merchantId}`, {
+  //     headers: this.getHeaders()
+  //   }).subscribe({
+  //     next: (response) => {
+  //       if (response.success && response.data) {
+  //         this.balance = response.data;
+  //       }
+  //     },
+  //     error: (err) => {
+  //       alert('Failed to fetch balance');
+  //     }
+  //   });
+  // }
 
   generateNewKey(appId: string, merchantId: string) {
     if (!merchantId) {
