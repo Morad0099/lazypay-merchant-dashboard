@@ -117,7 +117,7 @@ export class TransactionTableComponent implements OnInit {
     id: '',
     transactionNumber: '',
     status: '',
-    transactionType: EnumTransactionTypes.CREDIT // Initialize with CREDIT
+    transactionType: EnumTransactionTypes.CREDIT 
   };
 
   ngOnInit() {

@@ -690,7 +690,7 @@ export class ReportsComponent implements OnInit {
     try {
       const response = await this.http
         .post<ReportResponse>(
-          'https://doronpay.com/api/transactions/role/reports',
+          'https://doronpay.com/api/transactions/reports',
           this.filters,
           { headers: this.getHeaders() }
         )
