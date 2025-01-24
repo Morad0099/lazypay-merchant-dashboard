@@ -39,15 +39,15 @@ interface Transaction {
     ProviderTransId?: string;
     Data?: {
       Network?: string;
-    }
+    };
   };
 }
 
 interface APIResponse {
-    success: boolean;
-    message: string;
-    data: Transaction[]; // Changed from { transactions: Transaction[] }
-  }
+  success: boolean;
+  message: string;
+  data: Transaction[]; // Changed from { transactions: Transaction[] }
+}
 
 interface PaginatedResponse {
   success: boolean;
@@ -61,190 +61,184 @@ interface PaginatedResponse {
   };
 }
 interface FilterOptions {
-    status: string;
-    type: string;
-    search: string;
-  }
+  status: string;
+  type: string;
+  search: string;
+}
 @Component({
   selector: 'app-transactions',
   standalone: true,
-  imports: [CommonModule,FormsModule],
+  imports: [CommonModule, FormsModule],
   template: `
-  <div class="transactions-container">
-    <div class="header">
-      <h1>Transactions</h1>
-      <div class="header-stats">
-        <div class="stat-item">
-          <span class="label">Total Transactions:</span>
-          <span class="value">{{totalTransactions}}</span>
-        </div>
-        <div class="stat-item">
-          <span class="label">Total Amount:</span>
-          <span class="value">{{formatCurrency(totalAmount)}}</span>
-        </div>
-        <div class="stat-item">
-          <span class="label">Total Charges:</span>
-          <span class="value">{{formatCurrency(totalCharges)}}</span>
-        </div>
-      </div>
-      <button class="back-btn" (click)="goBack()">Back to Hub</button>
-    </div>
-
-    <!-- Add Filter Section -->
-      <div class="filters-section">
-        <div class="search-box">
-          <input 
-            type="text" 
-            [(ngModel)]="filters.search" 
-            (input)="applyFilters()"
-            placeholder="Search by name, reference or description..."
-            class="search-input"
-          >
-        </div>
-        
-        <div class="filter-buttons">
-          <select [(ngModel)]="filters.status" (change)="applyFilters()" class="filter-select">
-            <option value="">All Status</option>
-            <option value="PAID">Paid</option>
-            <option value="FAILED">Failed</option>
-            <option value="PENDING">Pending</option>
-            <option value="PROCESSING">Processing</option>
-          </select>
-
-          <select [(ngModel)]="filters.type" (change)="applyFilters()" class="filter-select">
-            <option value="">All Types</option>
-            <option value="DEBIT">Debit</option>
-            <option value="CREDIT">Credit</option>
-          </select>
-        </div>
-      </div>
-
-    <div class="loading-spinner" *ngIf="loading">
-      <div class="spinner"></div>
-    </div>
-
-    <div class="error-message" *ngIf="error">
-      {{error}}
-    </div>
-
-    <div *ngIf="!loading && transactions.length === 0" class="no-data">
-      No transactions found
-    </div>
-
-<div class="transactions-grid" *ngIf="!loading && filteredTransactions.length > 0">
-        <div class="transaction-card" *ngFor="let tx of paginatedTransactions">
-        <div class="transaction-header" [ngClass]="tx.status.toLowerCase()">
-          <span class="status-badge">{{tx.status}}</span>
-          <span class="type-badge">{{tx.transaction_type}}</span>
-          <span class="channel-badge">{{tx.channel}}</span>
-        </div>
-        
-        <div class="transaction-details">
-          <div class="amount-section">
-            <p class="amount">{{formatCurrency(tx.amount)}}</p>
-            <p class="currency">{{tx.currency}}</p>
-          </div>
-
-          <div class="party-details">
-            <div class="from-party">
-              <h4>From</h4>
-              <p class="name">{{tx.payment_account_name}}</p>
-              <p class="account">
-                {{tx.payment_account_number}}
-                <span class="account-type">
-                  {{tx.payment_account_issuer}} {{tx.payment_account_type}}
-                </span>
-              </p>
-            </div>
-
-            <div class="to-party">
-              <h4>To</h4>
-              <p class="name">{{tx.recipient_account_name}}</p>
-              <p class="account">
-                {{tx.recipient_account_number}}
-                <span class="account-type">
-                  {{tx.recipient_account_issuer_name}} {{tx.recipient_account_type}}
-                </span>
-              </p>
+    <div class="container mx-auto p-4">
+      <div class="bg-white rounded-lg shadow-sm">
+        <!-- Header -->
+        <div class="p-4 border-b">
+          <div class="flex justify-between items-center mb-4">
+            <h1 class="text-2xl font-semibold">Transactions</h1>
+            <div class="flex gap-2">
+              <span class="text-sm">Total: {{ totalTransactions }}</span>
+              <span class="text-sm">Amount: {{ totalAmount | currency }}</span>
             </div>
           </div>
 
-          <div class="reference-section">
-            <p class="ref-item">
-              <span class="label">Transaction Ref:</span>
-              <span class="value">{{tx.transactionRef}}</span>
-            </p>
-            <p class="ref-item">
-              <span class="label">External ID:</span>
-              <span class="value">{{tx.externalTransactionId}}</span>
-            </p>
-            <p class="ref-item" *ngIf="tx.transaction?.GTBTransId">
-              <span class="label">GTB Trans ID:</span>
-              <span class="value">{{tx.transaction?.GTBTransId}}</span>
-            </p>
-          </div>
-
-          <div class="status-details" *ngIf="tx.transaction">
-            <p class="message">{{tx.transaction.Message}}</p>
-            <p class="reason" *ngIf="tx.reason">{{tx.reason}}</p>
-          </div>
-
-          <p class="description">{{tx.description}}</p>
-          
-          <div class="timestamps">
-            <p class="date">Created: {{formatDate(tx.createdAt)}}</p>
-            <p class="date">Updated: {{formatDate(tx.updatedAt)}}</p>
-          </div>
-        </div>
-        
-        <div class="transaction-footer">
-          <div class="fee-details">
-            <p class="charges">Charges: {{formatCurrency(tx.charges)}}</p>
-            <p class="actual">Net: {{formatCurrency(tx.actualAmount)}}</p>
-            <p class="profit" *ngIf="tx.profitEarned">
-              Profit: {{formatCurrency(tx.profitEarned)}}
-            </p>
-          </div>
-          <div class="operator" *ngIf="tx.debitOperator">
-            <p class="operator-name">Operator: {{tx.debitOperator}}</p>
+          <!-- Filters -->
+          <div class="flex gap-4">
+            <input
+              type="text"
+              [(ngModel)]="filters.search"
+              (input)="applyFilters()"
+              placeholder="Search transactions..."
+              class="flex-1 px-3 py-2 border rounded-md"
+            />
+            <select
+              [(ngModel)]="filters.status"
+              (change)="applyFilters()"
+              class="px-3 py-2 border rounded-md"
+            >
+              <option value="">All Status</option>
+              <option value="PAID">Paid</option>
+              <option value="FAILED">Failed</option>
+              <option value="PENDING">Pending</option>
+            </select>
+            <select
+              [(ngModel)]="filters.type"
+              (change)="applyFilters()"
+              class="px-3 py-2 border rounded-md"
+            >
+              <option value="">All Types</option>
+              <option value="DEBIT">Debit</option>
+              <option value="CREDIT">Credit</option>
+            </select>
           </div>
         </div>
 
-      
-    </div>
-      </div>
+        <!-- Table -->
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="bg-gray-50">
+              <tr>
+                <th
+                  class="px-4 py-3 text-left text-sm font-medium text-gray-600"
+                >
+                  Status
+                </th>
+                <th
+                  class="px-4 py-3 text-left text-sm font-medium text-gray-600"
+                >
+                  Amount
+                </th>
+                <th
+                  class="px-4 py-3 text-left text-sm font-medium text-gray-600"
+                >
+                  From
+                </th>
+                <th
+                  class="px-4 py-3 text-left text-sm font-medium text-gray-600"
+                >
+                  To
+                </th>
+                <th
+                  class="px-4 py-3 text-left text-sm font-medium text-gray-600"
+                >
+                  Reference
+                </th>
+                <th
+                  class="px-4 py-3 text-left text-sm font-medium text-gray-600"
+                >
+                  Date
+                </th>
+                <th
+                  class="px-4 py-3 text-left text-sm font-medium text-gray-600"
+                >
+                  Charges
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                *ngFor="let tx of paginatedTransactions"
+                class="border-t hover:bg-gray-50"
+              >
+                <td class="px-4 py-3">
+                  <span [ngClass]="getStatusClass(tx.status)">
+                    {{ tx.status }}
+                  </span>
+                </td>
+                <td class="px-4 py-3">
+                  <div class="font-medium">{{ tx.amount | currency }}</div>
+                  <div class="text-sm text-gray-500">{{ tx.currency }}</div>
+                </td>
+                <td class="px-4 py-3">
+                  <div class="font-medium">{{ tx.payment_account_name }}</div>
+                  <div class="text-sm text-gray-500">
+                    {{ tx.payment_account_number }}
+                  </div>
+                </td>
+                <td class="px-4 py-3">
+                  <div class="font-medium">{{ tx.recipient_account_name }}</div>
+                  <div class="text-sm text-gray-500">
+                    {{ tx.recipient_account_number }}
+                  </div>
+                </td>
+                <td class="px-4 py-3">
+                  <div class="font-medium">{{ tx.transactionRef }}</div>
+                  <div class="text-sm text-gray-500">
+                    {{ tx.externalTransactionId }}
+                  </div>
+                </td>
+                <td class="px-4 py-3">
+                  <div class="font-medium">{{ tx.createdAt | date }}</div>
+                  <div class="text-sm text-gray-500">
+                    {{ tx.updatedAt | date : 'shortTime' }}
+                  </div>
+                </td>
+                <td class="px-4 py-3">
+                  <div class="font-medium">{{ tx.charges | currency }}</div>
+                  <div class="text-sm text-gray-500">
+                    Net: {{ tx.actualAmount | currency }}
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
         <!-- Pagination -->
-     <div class="pagination" *ngIf="filteredTransactions.length > 0">
-  <button 
-    class="page-btn"
-    [ngClass]="{'disabled': currentPage === 1}"
-    [disabled]="currentPage === 1"
-    (click)="changePage(currentPage - 1)">
-    Previous
-  </button>
-
-  <div class="page-numbers">
-    <ng-container *ngFor="let page of pageNumbers">
-      <button 
-        class="page-number"
-        [ngClass]="{'active': page === currentPage}"
-        (click)="changePage(page)">
-        {{ page }}
-      </button>
-    </ng-container>
-  </div>
-
-  <button 
-    class="page-btn"
-    [ngClass]="{'disabled': currentPage === totalPages}"
-    [disabled]="currentPage === totalPages"
-    (click)="changePage(currentPage + 1)">
-    Next
-  </button>
-</div>
+        <div class="flex items-center justify-between p-4 border-t">
+          <span class="text-sm text-gray-500">
+            Showing {{ (currentPage - 1) * pageSize + 1 }} to
+            {{ currentPage * pageSize }} of {{ totalTransactions }}
+          </span>
+          <div class="flex gap-2">
+            <button
+              [disabled]="currentPage === 1"
+              (click)="changePage(currentPage - 1)"
+              class="px-3 py-1 border rounded hover:bg-gray-50 disabled:opacity-50"
+            >
+              Previous
+            </button>
+            <button
+              *ngFor="let page of pageNumbers"
+              (click)="changePage(page)"
+              [ngClass]="{ 'bg-blue-50 text-blue-600': page === currentPage }"
+              class="px-3 py-1 border rounded hover:bg-gray-50"
+            >
+              {{ page }}
+            </button>
+            <button
+              [disabled]="currentPage === totalPages"
+              (click)="changePage(currentPage + 1)"
+              class="px-3 py-1 border rounded hover:bg-gray-50 disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
-`,
-  styleUrls: ['./transactions-merchant.component.scss']
+  `,
+  styleUrls: ['./transactions-merchant.component.scss'],
 })
 export class TransactionsMerchantComponent implements OnInit {
   transactions: Transaction[] = [];
@@ -253,13 +247,12 @@ export class TransactionsMerchantComponent implements OnInit {
   appId: string = '';
   pageNumbers: number[] = [];
 
-  
   // Pagination
   currentPage = 1;
   pageSize = 9;
   totalTransactions = 0;
   totalPages = 0;
-  
+
   // Summary stats
   totalAmount = 0;
   totalCharges = 0;
@@ -267,7 +260,7 @@ export class TransactionsMerchantComponent implements OnInit {
   filters: FilterOptions = {
     status: '',
     type: '',
-    search: ''
+    search: '',
   };
 
   allTransactions: Transaction[] = [];
@@ -290,6 +283,17 @@ export class TransactionsMerchantComponent implements OnInit {
     }
   }
 
+  getStatusClass(status: string): string {
+    const classes: any = {
+      PAID: 'bg-green-100 text-green-800',
+      FAILED: 'bg-red-100 text-red-800',
+      PENDING: 'bg-yellow-100 text-yellow-800',
+    };
+    return `inline-block px-2 py-1 text-xs font-medium rounded-full ${
+      classes[status] || ''
+    }`;
+  }
+
   private getHeaders(): HttpHeaders {
     const token = this.store.selectSnapshot(AuthState.token);
     return new HttpHeaders().set('Authorization', `Bearer ${token}`);
@@ -298,35 +302,48 @@ export class TransactionsMerchantComponent implements OnInit {
   fetchTransactions() {
     this.loading = true;
     this.error = '';
-    
-    this.http.get<APIResponse>(`https://doronpay.com/api/transactions/pending?id=${this.appId}`, {
-      headers: this.getHeaders()
-    }).subscribe({
-      next: (response) => {
-        if (response.success && response.data) {
-          this.allTransactions = response.data;
-          this.transactions = response.data; // Keep this for backward compatibility
-          
-          // Calculate totals from all transactions
-          this.totalTransactions = this.allTransactions.length;
-          this.totalAmount = this.allTransactions.reduce((sum, tx) => sum + (tx.amount || 0), 0);
-          this.totalCharges = this.allTransactions.reduce((sum, tx) => sum + (tx.charges || 0), 0);
-          
-          this.applyFilters();
-        } else {
-          this.error = 'No transactions data found';
-        }
-        this.loading = false;
-      },
-      error: (err) => {
-        this.error = 'Failed to fetch transactions';
-        this.loading = false;
-      }
-    });
-}
 
-updatePagination() {
-    const totalPages = Math.ceil(this.filteredTransactions.length / this.pageSize);
+    this.http
+      .get<APIResponse>(
+        `https://doronpay.com/api/transactions/pending?id=${this.appId}`,
+        {
+          headers: this.getHeaders(),
+        }
+      )
+      .subscribe({
+        next: (response) => {
+          if (response.success && response.data) {
+            this.allTransactions = response.data;
+            this.transactions = response.data; // Keep this for backward compatibility
+
+            // Calculate totals from all transactions
+            this.totalTransactions = this.allTransactions.length;
+            this.totalAmount = this.allTransactions.reduce(
+              (sum, tx) => sum + (tx.amount || 0),
+              0
+            );
+            this.totalCharges = this.allTransactions.reduce(
+              (sum, tx) => sum + (tx.charges || 0),
+              0
+            );
+
+            this.applyFilters();
+          } else {
+            this.error = 'No transactions data found';
+          }
+          this.loading = false;
+        },
+        error: (err) => {
+          this.error = 'Failed to fetch transactions';
+          this.loading = false;
+        },
+      });
+  }
+
+  updatePagination() {
+    const totalPages = Math.ceil(
+      this.filteredTransactions.length / this.pageSize
+    );
     this.totalPages = totalPages;
 
     // Calculate which page numbers to show
@@ -348,20 +365,23 @@ updatePagination() {
     let filtered = [...this.allTransactions];
 
     if (this.filters.status) {
-      filtered = filtered.filter(tx => tx.status === this.filters.status);
+      filtered = filtered.filter((tx) => tx.status === this.filters.status);
     }
 
     if (this.filters.type) {
-      filtered = filtered.filter(tx => tx.transaction_type === this.filters.type);
+      filtered = filtered.filter(
+        (tx) => tx.transaction_type === this.filters.type
+      );
     }
 
     if (this.filters.search) {
       const search = this.filters.search.toLowerCase();
-      filtered = filtered.filter(tx => 
-        tx.payment_account_name.toLowerCase().includes(search) ||
-        tx.transactionRef.toLowerCase().includes(search) ||
-        tx.description.toLowerCase().includes(search) ||
-        tx.payment_account_number.includes(search)
+      filtered = filtered.filter(
+        (tx) =>
+          tx.payment_account_name.toLowerCase().includes(search) ||
+          tx.transactionRef.toLowerCase().includes(search) ||
+          tx.description.toLowerCase().includes(search) ||
+          tx.payment_account_number.includes(search)
       );
     }
 
@@ -386,17 +406,19 @@ updatePagination() {
     this.paginatedTransactions = this.filteredTransactions.slice(start, end);
   }
 
-//   changePage(page: number) {
-//     if (page >= 1 && page <= this.totalPages) {
-//       this.currentPage = page;
-//       this.updatePaginatedTransactions();
-//     }
-//   }
+  //   changePage(page: number) {
+  //     if (page >= 1 && page <= this.totalPages) {
+  //       this.currentPage = page;
+  //       this.updatePaginatedTransactions();
+  //     }
+  //   }
 
   getPageNumbers(): number[] {
     const pages: number[] = [];
-    const totalPages = Math.ceil(this.filteredTransactions.length / this.pageSize);
-    
+    const totalPages = Math.ceil(
+      this.filteredTransactions.length / this.pageSize
+    );
+
     if (totalPages <= 5) {
       for (let i = 1; i <= totalPages; i++) pages.push(i);
     } else {
@@ -423,14 +445,14 @@ updatePagination() {
       month: 'short',
       year: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   }
 
   formatCurrency(amount: number): string {
     return new Intl.NumberFormat('en-GH', {
       style: 'currency',
-      currency: 'GHS'
+      currency: 'GHS',
     }).format(amount);
   }
 }

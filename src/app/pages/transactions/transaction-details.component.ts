@@ -51,16 +51,13 @@ export class TransactionDetailsComponent {
   }
 
   getStatusClass(status: string): string {
-    switch (status.toUpperCase()) {
-      case 'PAID':
-        return 'status-success';
-      case 'PENDING':
-        return 'status-pending';
-      case 'FAILED':
-        return 'status-failed';
-      default:
-        return 'status-default';
-    }
+    const baseClasses = 'px-3 py-1 rounded-full text-sm font-medium';
+    const statusClasses:any = {
+      completed: `${baseClasses} bg-green-100 text-green-800`,
+      pending: `${baseClasses} bg-yellow-100 text-yellow-800`,
+      failed: `${baseClasses} bg-red-100 text-red-800`
+    };
+    return statusClasses[status] || statusClasses.pending;
   }
 
   formatAmount(amount: number): string {

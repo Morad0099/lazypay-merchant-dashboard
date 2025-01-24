@@ -1,6 +1,5 @@
 import { Routes } from '@angular/router';
 import { AuthGuard } from './guard/auth.guard';
-import { MerchantSettlementsComponent } from './pages/merchants/merchant-settlement.component';
 import { HubDashboardComponent } from './pages/hub/hub-dashboard.component';
 import { TransactionsMerchantComponent } from './pages/transactions-merchant/transactions-merchant.component';
 import { MerchantProfileComponent } from './pages/merchant-profile/merchant-profile.component';
@@ -35,13 +34,6 @@ export const routes: Routes = [
             '../../src/app/pages/payment-reconcilation/payment-reconciliation.component'
           ).then((m) => m.PaymentReconciliationComponent),
       },
-      // {
-      //   path: 'mechant',
-      //   loadComponent: () =>
-      //     import('./pages/merchants/merchants.component').then(
-      //       (m) => m.MerchantComponent
-      //     ),
-      // },
       {
         path: 'mechant',
         component: UserMerchantsComponent,
@@ -86,16 +78,12 @@ export const routes: Routes = [
         component: HubDashboardComponent,
       },
       {
-        path: 'merchants/settlements/:id',
-        component: MerchantSettlementsComponent,
-      },
-      {
         path: 'transaction',
         component: TransactionDetailsComponent,
       },
       // Add other child routes here
-      { path: '', redirectTo: 'payment-reconciliation', pathMatch: 'full' },
+      { path: '', redirectTo: 'wallets', pathMatch: 'full' },
     ],
   },
-  { path: '**', redirectTo: 'payment-reconciliation' },
+  { path: '**', redirectTo: 'wallets' },
 ];

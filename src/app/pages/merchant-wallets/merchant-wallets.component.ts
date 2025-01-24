@@ -1,11 +1,18 @@
 import { Component, OnInit } from '@angular/core';
 import { AsyncPipe, CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { HttpClient, HttpClientModule, HttpHeaders } from '@angular/common/http';
+import {
+  HttpClient,
+  HttpClientModule,
+  HttpHeaders,
+} from '@angular/common/http';
 import { FormBuilder } from '@angular/forms';
 import { NgxsModule, Select, Store } from '@ngxs/store';
 import { AuthState } from '../../state/apps/app.states';
 import { Observable } from 'rxjs';
+import { ModalService } from '../../service/modal.service';
+import { DepositComponent } from '../../components/deposit-component/deposit.component';
+import { WithdrawComponent } from '../../components/withdraw-component/withdraw.component';
 
 interface WalletAccount {
   _id: string;
@@ -31,9 +38,17 @@ interface WalletAccount {
 @Component({
   selector: 'app-merchant-wallets',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, HttpClientModule, AsyncPipe, NgxsModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    HttpClientModule,
+    AsyncPipe,
+    NgxsModule,
+    FormsModule,
+  ],
   templateUrl: './merchant-wallets.component.html',
-  styleUrls: ['./merchant-wallets.component.scss']
+  styleUrls: ['./merchant-wallets.component.scss'],
 })
 export class MerchantWalletsComponent implements OnInit {
   @Select(AuthState.user) user$!: Observable<any>;
@@ -51,10 +66,11 @@ export class MerchantWalletsComponent implements OnInit {
     private http: HttpClient,
     private fb: FormBuilder,
     private store: Store,
+    private modalService: ModalService
   ) {}
 
   ngOnInit(): void {
-    this.store.select(AuthState.user).subscribe(user => {
+    this.store.select(AuthState.user).subscribe((user) => {
       if (user?.merchantId?._id) {
         this.merchantId = user.merchantId._id;
         this.merchantname = user.merchantId.merchant_tradeName;
@@ -66,22 +82,24 @@ export class MerchantWalletsComponent implements OnInit {
   fetchWallets(merchantId: string) {
     this.loading = true;
     this.error = null;
-    
-    this.http.get<any>(`https://doronpay.com/api/accounts/merchant/${merchantId}`, {
-      headers: this.getHeaders()
-    }).subscribe({
-      next: (response) => {
-        if (response.success && response.data) {
-          this.wallets = response.data;
-          this.filteredWallets = response.data;
-        }
-        this.loading = false;
-      },
-      error: (err) => {
-        this.error = 'Failed to fetch wallets. Please try again later.';
-        this.loading = false;
-      }
-    });
+
+    this.http
+      .get<any>(`https://doronpay.com/api/accounts/merchant/${merchantId}`, {
+        headers: this.getHeaders(),
+      })
+      .subscribe({
+        next: (response) => {
+          if (response.success && response.data) {
+            this.wallets = response.data;
+            this.filteredWallets = response.data;
+          }
+          this.loading = false;
+        },
+        error: (err) => {
+          this.error = 'Failed to fetch wallets. Please try again later.';
+          this.loading = false;
+        },
+      });
   }
 
   private getHeaders(): HttpHeaders {
@@ -89,10 +107,14 @@ export class MerchantWalletsComponent implements OnInit {
     return new HttpHeaders().set('Authorization', `Bearer ${token}`);
   }
 
-  searchWallets(event: KeyboardEvent): void {
-    const searchTerm = (event.target as HTMLInputElement).value.toLowerCase();
-    this.searchTerm = searchTerm;
-    this.filterWallets();
+  searchWallets(event: any): void {
+    const value = event.target.value.toLowerCase();
+    this.filteredWallets = this.wallets.filter(
+      (wallet) =>
+        wallet.accountNumber.toLowerCase().includes(value) ||
+        wallet.walletType.toLowerCase().includes(value) ||
+        wallet.currency.toLowerCase().includes(value)
+    );
   }
 
   filterWallets(): void {
@@ -101,7 +123,7 @@ export class MerchantWalletsComponent implements OnInit {
       return;
     }
 
-    this.filteredWallets = this.wallets.filter(wallet => {
+    this.filteredWallets = this.wallets.filter((wallet) => {
       return (
         wallet.accountNumber.toLowerCase().includes(this.searchTerm) ||
         wallet.walletType.toLowerCase().includes(this.searchTerm) ||
@@ -111,19 +133,53 @@ export class MerchantWalletsComponent implements OnInit {
     });
   }
 
-  formatAccountNumber(accountNumber: string): string {
-    if (!accountNumber) return '';
-    return accountNumber.replace(/(\d{4})/g, '$1 ').trim();
+  formatAccountNumber(num: string): string {
+    return num.match(/.{1,4}/g)?.join(' ') || num;
   }
 
   formatCurrency(amount: number, currency: string): string {
-    return new Intl.NumberFormat('en-GH', {
+    return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: currency
+      currency: currency,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: currency === 'BTC' ? 8 : 2,
     }).format(amount || 0);
   }
 
   getStatusClass(active: boolean): string {
     return active ? 'status-active' : 'status-inactive';
+  }
+
+  getCurrencySymbol(type: string): string {
+    switch (type) {
+      case 'BTC':
+        return '₿';
+      case 'USDT':
+        return '₮';
+      case 'FIAT':
+        return '¢';
+      default:
+        return '$';
+    }
+  }
+
+  getWalletColor(type: string): string {
+    switch (type) {
+      case 'BTC':
+        return 'bg-orange-500';
+      case 'USDT':
+        return 'bg-green-500';
+      default:
+        return 'bg-blue-500';
+    }
+  }
+
+  deposit(wallet: any): void {
+    this.modalService.open(DepositComponent, { wallet });
+  }
+
+  withdraw(wallet: any): void {
+    if (!wallet.confirmedBalance) return;
+    this.modalService.open(WithdrawComponent, { wallet });
   }
 }

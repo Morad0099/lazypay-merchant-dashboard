@@ -21,167 +21,214 @@ interface User {
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <div class="users-container">
-      <!-- Header Section -->
-      <div class="header">
-        <div class="title-section">
-          <h1>User Management</h1>
-          <p>Manage user access and permissions</p>
+    <div class="max-w-7xl mx-auto p-4">
+      <!-- Header -->
+      <header class="flex justify-between items-center mb-4">
+        <div>
+          <h1 class="text-xl font-semibold">User Management</h1>
+          <p class="text-sm text-gray-600">
+            Manage user access and permissions
+          </p>
         </div>
-        <button class="add-btn" (click)="showAddUserModal = true">
+        <button
+          class="bg-blue-600 text-white px-3 py-1.5 rounded"
+          (click)="showAddUserModal = true"
+        >
           Add New User
         </button>
+      </header>
+
+      <!-- States -->
+      <div *ngIf="loading" class="flex justify-center p-4">
+        <div
+          class="spinner animate-spin h-6 w-6 border-b-2 border-blue-600 rounded-full"
+        ></div>
+      </div>
+      <div *ngIf="error" class="text-red-600 bg-red-50 p-3 rounded mb-4">
+        {{ error }}
       </div>
 
-      <!-- Loading State -->
-      <div class="loading-spinner" *ngIf="loading">
-        <div class="spinner"></div>
-      </div>
-
-      <!-- Error Message -->
-      <div class="error-message" *ngIf="error">
-        {{error}}
-      </div>
-
-      <!-- Users Grid -->
-      <div class="users-grid" *ngIf="!loading && users.length > 0">
-        <div class="user-card" *ngFor="let user of users">
-          <div class="user-header">
-            <div class="user-avatar">
-              {{ user.name.charAt(0).toUpperCase() }}
-            </div>
-            <div class="user-info">
-              <h3>{{user.name}}</h3>
-              <p class="email">{{user.email}}</p>
-            </div>
-            <div class="actions">
-              <button class="edit-btn" (click)="editUser(user)">Edit</button>
-            </div>
-          </div>
-
-          <div class="user-details">
-            <div class="detail-item">
-              <span class="label">Phone:</span>
-              <span class="value">{{user.phone}}</span>
-            </div>
-            <div class="detail-item">
-              <span class="label">Account Type:</span>
-              <span class="value">{{user.accountType || 'Standard'}}</span>
-            </div>
-            <div class="detail-item">
-              <span class="label">Last Active:</span>
-              <span class="value">{{formatDate(user.lastSeen || user.createdAt)}}</span>
-            </div>
-          </div>
-
-          <div class="permissions">
-            <span class="permission-tag" *ngFor="let perm of user.permissions">
-              {{perm}}
+      <!-- Users -->
+      <div
+        *ngIf="!loading && users.length > 0"
+        class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3"
+      >
+        <div
+          *ngFor="let user of users"
+          class="bg-white p-3 rounded shadow-sm border"
+        >
+          <!-- User Header -->
+          <div class="flex gap-2 mb-2">
+            <span
+              class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-sm font-medium"
+            >
+              {{ user.name[0] }}
             </span>
+            <div class="flex-1 min-w-0">
+              <h3 class="font-medium truncate text-sm">{{ user.name }}</h3>
+              <p class="text-xs text-gray-500 truncate">{{ user.email }}</p>
+            </div>
+            <button
+              (click)="editUser(user)"
+              class="text-gray-400 hover:text-blue-600"
+            >
+              Edit
+            </button>
+          </div>
+
+          <!-- User Info -->
+          <div class="text-xs space-y-1 mb-2">
+            <div class="flex justify-between">
+              <span class="text-gray-500">Phone:</span>{{ user.phone }}
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-500">Type:</span
+              >{{ user.accountType || 'Standard' }}
+            </div>
+            <div class="flex justify-between">
+              <span class="text-gray-500">Active:</span
+              >{{ formatDate(user.lastSeen || user.createdAt) }}
+            </div>
+          </div>
+
+          <!-- Permissions -->
+          <div class="flex flex-wrap gap-1">
+            <span
+              *ngFor="let perm of user.permissions"
+              class="px-2 py-0.5 bg-blue-50 text-blue-600 text-xs rounded"
+              >{{ perm }}</span
+            >
           </div>
         </div>
       </div>
 
-      <!-- Add User Modal -->
-      <div class="modal" *ngIf="showAddUserModal" (click)="closeModals($event)">
-        <div class="modal-content">
-          <h2>Add New User</h2>
-          <form (submit)="addUser($event)">
-            <div class="form-group">
-              <label>Name</label>
-              <input type="text" [(ngModel)]="newUser.name" name="name" required>
+      <!-- Add Modal -->
+      <div
+        *ngIf="showAddUserModal"
+        class="fixed inset-0 bg-black/50 flex items-center justify-center p-4"
+        (click)="closeModals($event)"
+      >
+        <div class="bg-white rounded w-full max-w-md p-4">
+          <h2 class="text-lg font-medium mb-3">Add New User</h2>
+          <form (submit)="addUser($event)" class="space-y-3">
+            <!-- Form Fields -->
+            <div *ngFor="let field of ['name', 'email', 'phone', 'password']">
+              <label class="block text-sm mb-1">{{ field }}</label>
+              <input
+                [type]="
+                  field === 'password'
+                    ? 'password'
+                    : field === 'email'
+                    ? 'email'
+                    : 'text'
+                "
+                [(ngModel)]="newUser[field]"
+                [name]="field"
+                required
+                class="w-full px-3 py-1.5 border rounded text-sm"
+              />
             </div>
-            <div class="form-group">
-              <label>Email</label>
-              <input type="email" [(ngModel)]="newUser.email" name="email" required>
-            </div>
-            <div class="form-group">
-              <label>Phone</label>
-              <input type="tel" [(ngModel)]="newUser.phone" name="phone" required>
-            </div>
-            <div class="form-group">
-              <label>Password</label>
-              <input type="password" [(ngModel)]="newUser.password" name="password" required>
-            </div>
-            <div class="form-group">
-              <label>Permissions</label>
-              <div class="permissions-select">
-                <label class="checkbox-label">
-                  <input type="checkbox" 
-                         [checked]="newUser.permissions.includes('Admin')"
-                         (change)="togglePermission('Admin', newUser.permissions)">
-                  Admin
-                </label>
-                <label class="checkbox-label">
-                  <input type="checkbox" 
-                         [checked]="newUser.permissions.includes('Initiator')"
-                         (change)="togglePermission('Initiator', newUser.permissions)">
-                  Initiator
-                </label>
-                <label class="checkbox-label">
-                  <input type="checkbox" 
-                         [checked]="newUser.permissions.includes('Approver')"
-                         (change)="togglePermission('Approver', newUser.permissions)">
-                  Approver
+
+            <!-- Permissions -->
+            <div>
+              <label class="block text-sm mb-1">Permissions</label>
+              <div class="space-y-1">
+                <label
+                  *ngFor="let perm of ['Admin', 'Initiator', 'Approver']"
+                  class="flex items-center text-sm"
+                >
+                  <input
+                    type="checkbox"
+                    [checked]="newUser.permissions.includes(perm)"
+                    (change)="togglePermission(perm, newUser.permissions)"
+                    class="mr-2"
+                  />
+                  {{ perm }}
                 </label>
               </div>
             </div>
-            <div class="modal-actions">
-              <button type="button" class="cancel-btn" (click)="showAddUserModal = false">Cancel</button>
-              <button type="submit" class="submit-btn" [disabled]="isSubmitting">
-                <span class="spinner" *ngIf="isSubmitting"></span>
-                Add User
+
+            <!-- Actions -->
+            <div class="flex justify-end gap-2 mt-4">
+              <button
+                type="button"
+                (click)="showAddUserModal = false"
+                class="px-3 py-1.5 text-sm"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                [disabled]="isSubmitting"
+                class="bg-blue-600 text-white px-3 py-1.5 rounded text-sm"
+              >
+                <span
+                  *ngIf="isSubmitting"
+                  class="inline-block animate-spin mr-1"
+                  >⌛</span
+                >Add
               </button>
             </div>
           </form>
         </div>
       </div>
 
-      <!-- Edit User Modal -->
-      <div class="modal" *ngIf="showEditModal" (click)="closeModals($event)">
-        <div class="modal-content">
-          <h2>Edit User</h2>
-          <form (submit)="updateUser($event)">
-            <div class="form-group">
-              <label>Name</label>
-              <input type="text" [(ngModel)]="editingUser.name" name="name" required>
+      <!-- Edit Modal -->
+      <div
+        *ngIf="showEditModal"
+        class="fixed inset-0 bg-black/50 flex items-center justify-center p-4"
+        (click)="closeModals($event)"
+      >
+        <div class="bg-white rounded w-full max-w-md p-4">
+          <h2 class="text-lg font-medium mb-3">Edit User</h2>
+          <form (submit)="updateUser($event)" class="space-y-3">
+            <div *ngFor="let field of ['name', 'email', 'phone']">
+              <label class="block text-sm mb-1">{{ field }}</label>
+              <input
+                [type]="field === 'email' ? 'email' : 'text'"
+                [(ngModel)]="editingUser[field]"
+                [name]="field"
+                required
+                class="w-full px-3 py-1.5 border rounded text-sm"
+              />
             </div>
-            <div class="form-group">
-              <label>Email</label>
-              <input type="email" [(ngModel)]="editingUser.email" name="email" required>
-            </div>
-            <div class="form-group">
-              <label>Phone</label>
-              <input type="tel" [(ngModel)]="editingUser.phone" name="phone" required>
-            </div>
-            <div class="form-group">
-              <label>Permissions</label>
-              <div class="permissions-select">
-                <label class="checkbox-label">
-                  <input type="checkbox" 
-                         [checked]="editingUser.permissions.includes('Admin')"
-                         (change)="togglePermission('Admin', editingUser.permissions)">
-                  Admin
-                </label>
-                <label class="checkbox-label">
-                  <input type="checkbox" 
-                         [checked]="editingUser.permissions.includes('Initiator')"
-                         (change)="togglePermission('Initiator', editingUser.permissions)">
-                  Initiator
-                </label>
-                <label class="checkbox-label">
-                  <input type="checkbox" 
-                         [checked]="editingUser.permissions.includes('Approver')"
-                         (change)="togglePermission('Approver', editingUser.permissions)">
-                  Approver
+
+            <div>
+              <label class="block text-sm mb-1">Permissions</label>
+              <div class="space-y-1">
+                <label
+                  *ngFor="let perm of ['Admin', 'Initiator', 'Approver']"
+                  class="flex items-center text-sm"
+                >
+                  <input
+                    type="checkbox"
+                    [checked]="editingUser.permissions.includes(perm)"
+                    (change)="togglePermission(perm, editingUser.permissions)"
+                    class="mr-2"
+                  />
+                  {{ perm }}
                 </label>
               </div>
             </div>
-            <div class="modal-actions">
-              <button type="button" class="cancel-btn" (click)="showEditModal = false">Cancel</button>
-              <button type="submit" class="submit-btn" [disabled]="isSubmitting">
-                <span class="spinner" *ngIf="isSubmitting"></span>
-                Update User
+
+            <div class="flex justify-end gap-2 mt-4">
+              <button
+                type="button"
+                (click)="showEditModal = false"
+                class="px-3 py-1.5 text-sm"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                [disabled]="isSubmitting"
+                class="bg-blue-600 text-white px-3 py-1.5 rounded text-sm"
+              >
+                <span
+                  *ngIf="isSubmitting"
+                  class="inline-block animate-spin mr-1"
+                  >⌛</span
+                >Update
               </button>
             </div>
           </form>
@@ -189,7 +236,7 @@ interface User {
       </div>
     </div>
   `,
-  styleUrls: ['./users.component.scss']
+  styleUrls: ['./users.component.scss'],
 })
 export class UsersComponent implements OnInit {
   users: User[] = [];
@@ -199,31 +246,30 @@ export class UsersComponent implements OnInit {
   showEditModal = false;
   isSubmitting = false;
 
-  newUser = {
+  newUser:any = {
     name: '',
     email: '',
     phone: '',
     password: '',
     permissions: [] as string[],
-    merchantId: ''
+    merchantId: '',
   };
 
-  editingUser = {
+  editingUser:any = {
     _id: '',
     name: '',
     email: '',
     phone: '',
-    permissions: [] as string[]
+    permissions: [] as string[],
   };
 
-  constructor(
-    private http: HttpClient,
-    private store: Store
-  ) {}
+  constructor(private http: HttpClient, private store: Store) {}
 
   ngOnInit() {
     this.fetchUsers();
-    this.newUser.merchantId = this.store.selectSnapshot(state => state.auth.user?.merchantId?._id);
+    this.newUser.merchantId = this.store.selectSnapshot(
+      (state) => state.auth.user?.merchantId?._id
+    );
   }
 
   private getHeaders(): HttpHeaders {
@@ -232,50 +278,56 @@ export class UsersComponent implements OnInit {
   }
 
   fetchUsers() {
-    const merchantId = this.store.selectSnapshot(state => state.auth.user?.merchantId?._id);
+    const merchantId = this.store.selectSnapshot(
+      (state) => state.auth.user?.merchantId?._id
+    );
     if (!merchantId) return;
 
     this.loading = true;
-    this.http.get<any>(`https://doronpay.com/api/merchants/roles/get/${merchantId}`, {
-      headers: this.getHeaders()
-    }).subscribe({
-      next: (response) => {
-        if (response.success) {
-          this.users = response.data;
-        } else {
+    this.http
+      .get<any>(`https://doronpay.com/api/merchants/roles/get/${merchantId}`, {
+        headers: this.getHeaders(),
+      })
+      .subscribe({
+        next: (response) => {
+          if (response.success) {
+            this.users = response.data;
+          } else {
+            this.error = 'Failed to load users';
+          }
+          this.loading = false;
+        },
+        error: (err) => {
           this.error = 'Failed to load users';
-        }
-        this.loading = false;
-      },
-      error: (err) => {
-        this.error = 'Failed to load users';
-        this.loading = false;
-      }
-    });
+          this.loading = false;
+        },
+      });
   }
 
   addUser(event: Event) {
     event.preventDefault();
     this.isSubmitting = true;
 
-    this.http.post<any>('https://doronpay.com/api/merchants/roles/add', this.newUser, {
-      headers: this.getHeaders()
-    }).subscribe({
-      next: (response) => {
-        if (response.success) {
-          this.showAddUserModal = false;
-          this.fetchUsers();
-          this.resetNewUser();
-        } else {
-          alert(response.message || 'Failed to add user');
-        }
-        this.isSubmitting = false;
-      },
-      error: (err) => {
-        alert('Failed to add user');
-        this.isSubmitting = false;
-      }
-    });
+    this.http
+      .post<any>('https://doronpay.com/api/merchants/roles/add', this.newUser, {
+        headers: this.getHeaders(),
+      })
+      .subscribe({
+        next: (response) => {
+          if (response.success) {
+            this.showAddUserModal = false;
+            this.fetchUsers();
+            this.resetNewUser();
+          } else {
+            alert(response.message || 'Failed to add user');
+          }
+          this.isSubmitting = false;
+        },
+        error: (err) => {
+          alert('Failed to add user');
+          this.isSubmitting = false;
+        },
+      });
   }
 
   editUser(user: User) {
@@ -284,7 +336,7 @@ export class UsersComponent implements OnInit {
       name: user.name,
       email: user.email,
       phone: user.phone,
-      permissions: [...user.permissions]
+      permissions: [...user.permissions],
     };
     this.showEditModal = true;
   }
@@ -299,27 +351,29 @@ export class UsersComponent implements OnInit {
         name: this.editingUser.name,
         email: this.editingUser.email,
         phone: this.editingUser.phone,
-        permissions: this.editingUser.permissions
-      }
+        permissions: this.editingUser.permissions,
+      },
     };
 
-    this.http.put<any>('https://doronpay.com/api/merchants/roles/update', payload, {
-      headers: this.getHeaders()
-    }).subscribe({
-      next: (response) => {
-        if (response.success) {
-          this.showEditModal = false;
-          this.fetchUsers();
-        } else {
-          alert(response.message || 'Failed to update user');
-        }
-        this.isSubmitting = false;
-      },
-      error: (err) => {
-        alert('Failed to update user');
-        this.isSubmitting = false;
-      }
-    });
+    this.http
+      .put<any>('https://doronpay.com/api/merchants/roles/update', payload, {
+        headers: this.getHeaders(),
+      })
+      .subscribe({
+        next: (response) => {
+          if (response.success) {
+            this.showEditModal = false;
+            this.fetchUsers();
+          } else {
+            alert(response.message || 'Failed to update user');
+          }
+          this.isSubmitting = false;
+        },
+        error: (err) => {
+          alert('Failed to update user');
+          this.isSubmitting = false;
+        },
+      });
   }
 
   togglePermission(permission: string, permissions: string[]) {
@@ -338,7 +392,7 @@ export class UsersComponent implements OnInit {
       phone: '',
       password: '',
       permissions: [],
-      merchantId: this.newUser.merchantId
+      merchantId: this.newUser.merchantId,
     };
   }
 
@@ -353,6 +407,7 @@ export class UsersComponent implements OnInit {
     return new Date(date).toLocaleDateString('en-GB', {
       day: '2-digit',
       month: 'short',
-      year: 'numeric'
+      year: 'numeric',
     });
-  }}
+  }
+}

@@ -1,73 +1,124 @@
-<!-- topbar.component.html -->
-<!-- <div>dfdf</div> -->
-
-<div class="layout-wrapper" [class.collapsed]="isCollapsed">
-    <!-- <div>fdfdfd</div> -->
+<div class="flex" [class.sidebar-collapsed]="isCollapsed">
   <!-- Sidebar -->
-  <aside class="sidebar">
-    <!-- Logo Section -->
-    <div class="sidebar-header">
-      <a class="logo-wrapper">
-       
-        <!-- <img *ngIf="logo" [src]="logo" alt="Logo" class="logo" /> -->
-      </a>
-      <button class="collapse-btn" (click)="toggleSidebar()" style="background-color: red;">
-        <!-- <i class="bi" [class.bi-chevron-left]="!isCollapsed" [class.bi-chevron-right]="isCollapsed" style="color: white; background-color: red;"></i> -->
-       <i class="ri-arrow-drop-right-line icon" ></i>
-        <!-- <div>sdsds</div> -->
-      </button>
-      
+  <aside
+    class="relative min-h-screen bg-white border-r border-gray-200 transition-all duration-300"
+    [class]="isCollapsed ? 'w-20' : 'w-64'"
+    [class]="isCollapsed ? 'w-20' : 'w-64'"
+  >
+    <div class="pb-48">
+      <!-- Logo Section -->
+      <div
+        class="flex items-center justify-between p-4 border-b border-gray-200"
+      >
+        <a class="flex items-center">
+          <img
+            src="../../../assets/images/doron.png"
+            alt="Logo"
+            class="h-8 w-auto"
+          />
+        </a>
+        <button
+          class="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600 transition-colors"
+          (click)="toggleSidebar()"
+        >
+          <i class="ri-arrow-drop-right-line text-lg"></i>
+        </button>
+      </div>
+      <!-- Navigation Menu -->
+      <nav class="py-4">
+        <ul class="space-y-2">
+          <li
+            *ngFor="let menuItem of menuItems"
+            class="relative"
+            [class.bg-blue-50]="router.isActive(menuItem.path, true)"
+          >
+            <a
+              [routerLink]="[menuItem.path]"
+              [title]="isCollapsed ? menuItem.title : ''"
+              class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-100 transition-colors"
+            >
+              <i [class]="getMenuIcon(menuItem.path) + ' text-xl'"></i>
+              <span
+                class="ml-3 transition-opacity duration-300"
+                [class.opacity-0]="isCollapsed"
+              >
+                {{ menuItem.title }}
+              </span>
+              <span
+                *ngIf="router.isActive(menuItem.path, true)"
+                class="absolute right-0 w-1 h-full bg-blue-500 top-0"
+              >
+              </span>
+            </a>
+          </li>
+        </ul>
+      </nav>
     </div>
 
-   
+    <!-- Footer -->
+    <div
+      class="absolute bottom-0 w-full border-t border-gray-200 p-4 space-y-2"
+    >
+      <button
+        class="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+      >
+        <i class="bi bi-gear text-xl"></i>
+        <span
+          class="ml-3 transition-opacity duration-300"
+          [class.opacity-0]="isCollapsed"
+          >Settings</span
+        >
+      </button>
 
-    <!-- Navigation Menu -->
-    <nav class="sidebar-nav">
-      <ul class="nav-list">
-        <li *ngFor="let menuItem of menuItems" 
-            class="nav-item"
-            [class.active]="router.isActive(menuItem.path, true)"
-            [ngClass]="menuItem.class">
-          <a class="nav-link" [routerLink]="[menuItem.path]" [title]="isCollapsed ? menuItem.title : ''">
-            <i [class]="getMenuIcon(menuItem.path)"></i>
-            <span class="nav-text" *ngIf="!isCollapsed">{{ menuItem.title }}</span>
-            <span class="nav-indicator" *ngIf="router.isActive(menuItem.path, true)"></span>
-          </a>
-        </li>
-      </ul>
-    </nav>
+      <button
+        class="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+      >
+        <i class="bi bi-question-circle text-xl"></i>
+        <span
+          class="ml-3 transition-opacity duration-300"
+          [class.opacity-0]="isCollapsed"
+          >Help</span
+        >
+      </button>
 
-    <!-- Bottom Actions -->
-    <div class="sidebar-footer">
-        
-      <!-- <button class="refresh-btn" (click)="loadBalance()" title="Refresh Balance">
-        <i class="bi bi-arrow-clockwise"></i>
-        <span *ngIf="!isCollapsed">Refresh Balance</span>
-      </button> -->
-      <button class="logout-btn" (click)="logout()" title="Logout">
-        <i class="bi bi-box-arrow-right"></i>
-        <span *ngIf="!isCollapsed">Logout</span>
+      <button
+        class="flex items-center w-full px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+        (click)="logout()"
+      >
+        <i class="bi bi-box-arrow-right text-xl"></i>
+        <span
+          class="ml-3 transition-opacity duration-300"
+          [class.opacity-0]="isCollapsed"
+          >Logout</span
+        >
       </button>
     </div>
   </aside>
 
-  <!-- Main Content Area -->
-  <main class="main-content">
+  <!-- Main Content -->
+  <main class="flex-1 bg-gray-50">
     <!-- Mobile Header -->
-    <div class="mobile-header">
-      <button class="mobile-toggle" (click)="toggleSidebar()">
-        <i class="bi bi-list"></i>
+    <div
+      class="lg:hidden flex items-center justify-between p-4 bg-white border-b border-gray-200"
+    >
+      <button
+        class="p-2 hover:bg-gray-100 rounded-lg"
+        (click)="toggleSidebar()"
+      >
+        <i class="bi bi-list text-xl"></i>
       </button>
-      <div class="mobile-logo">
-        <img *ngIf="logo" [src]="logo" alt="Logo" />
-      </div>
-      <div class="mobile-user">
-        <i class="bi bi-person-circle"></i>
+      <img
+        src="../../../assets/images/doron.png"
+        alt="Logo"
+        class="h-8 w-auto"
+      />
+      <div class="p-2">
+        <i class="bi bi-person-circle text-xl"></i>
       </div>
     </div>
 
     <!-- Content Area -->
-    <div class="content-wrapper">
+    <div class="p-6">
       <ng-content></ng-content>
     </div>
   </main>
