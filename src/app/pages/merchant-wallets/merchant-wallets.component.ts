@@ -11,8 +11,6 @@ import { NgxsModule, Select, Store } from '@ngxs/store';
 import { AuthState } from '../../state/apps/app.states';
 import { Observable } from 'rxjs';
 import { ModalService } from '../../service/modal.service';
-import { DepositComponent } from '../../components/deposit-component/deposit.component';
-import { WithdrawComponent } from '../../components/withdraw-component/withdraw.component';
 
 interface WalletAccount {
   _id: string;
@@ -62,12 +60,7 @@ export class MerchantWalletsComponent implements OnInit {
   merchantId: string = '';
   merchantname: string = '';
 
-  constructor(
-    private http: HttpClient,
-    private fb: FormBuilder,
-    private store: Store,
-    private modalService: ModalService
-  ) {}
+  constructor(private http: HttpClient, private store: Store) {}
 
   ngOnInit(): void {
     this.store.select(AuthState.user).subscribe((user) => {
@@ -172,14 +165,5 @@ export class MerchantWalletsComponent implements OnInit {
       default:
         return 'bg-blue-500';
     }
-  }
-
-  deposit(wallet: any): void {
-    this.modalService.open(DepositComponent, { wallet });
-  }
-
-  withdraw(wallet: any): void {
-    if (!wallet.confirmedBalance) return;
-    this.modalService.open(WithdrawComponent, { wallet });
   }
 }

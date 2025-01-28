@@ -27,13 +27,13 @@ export const routes: Routes = [
       ),
     canActivate: [AuthGuard],
     children: [
-      {
-        path: 'payment-reconciliation',
-        loadComponent: () =>
-          import(
-            '../../src/app/pages/payment-reconcilation/payment-reconciliation.component'
-          ).then((m) => m.PaymentReconciliationComponent),
-      },
+      // {
+      //   path: 'payment-reconciliation',
+      //   loadComponent: () =>
+      //     import(
+      //       '../../src/app/pages/payment-reconcilation/payment-reconciliation.component'
+      //     ).then((m) => m.PaymentReconciliationComponent),
+      // },
       {
         path: 'mechant',
         component: UserMerchantsComponent,

@@ -85,7 +85,12 @@
           </div>
 
           <div class="flex justify-between items-center pt-4 border-t">
-            <div class="flex items-center gap-2">
+            <div class="flex flex-col">
+              <span class="text-sm text-gray-500">Account Type</span>
+              <span class="font-medium">{{ wallet.accountType }}</span>
+            </div>
+
+            <div class="flex items-center gap-3">
               <span
                 [class]="
                   'px-2 py-1 rounded text-xs ' +
@@ -99,28 +104,6 @@
               <span class="px-2 py-1 rounded text-xs bg-gray-100 text-gray-800">
                 {{ wallet.currency }}
               </span>
-            </div>
-            <div class="flex items-center gap-3">
-              <button
-                (click)="deposit(wallet)"
-                [class]="getWalletColor(wallet.walletType)"
-                class="w-8 h-8 rounded-full text-white hover:opacity-80 transition-opacity flex items-center justify-center"
-              >
-                <i class="fas fa-arrow-circle-down"></i>
-              </button>
-              <button
-                (click)="withdraw(wallet)"
-                [disabled]="!wallet.confirmedBalance"
-                [class]="
-                  getWalletColor(wallet.walletType) +
-                  ' w-8 h-8 rounded-full text-white flex items-center justify-center ' +
-                  (!wallet.confirmedBalance
-                    ? 'opacity-50 cursor-not-allowed'
-                    : 'hover:opacity-80')
-                "
-              >
-                <i class="fas fa-arrow-circle-up"></i>
-              </button>
             </div>
           </div>
         </div>
