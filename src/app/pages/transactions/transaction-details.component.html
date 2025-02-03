@@ -1,262 +1,182 @@
-<div class="min-h-screen py-8">
+<!-- transaction-details.component.html -->
+<div class="min-h-screen py-8 bg-gray-50">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <!-- Search Section -->
-    <div class="bg-white rounded-xl shadow-sm mb-6">
-      <div class="p-6">
-        <form
-          [formGroup]="searchForm"
-          (ngSubmit)="searchTransaction()"
-          class="flex gap-3"
-        >
+    <!-- Stats Overview -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+      <div class="bg-white p-4 rounded-lg shadow-sm">
+        <div class="text-sm text-gray-500">Total Transactions</div>
+        <div class="text-2xl font-bold text-gray-900">{{ transactions.length }}</div>
+      </div>
+      <div class="bg-white p-4 rounded-lg shadow-sm">
+        <div class="text-sm text-gray-500">Total Amount</div>
+        <div class="text-2xl font-bold text-gray-900">
+          {{ calculateTotal('amount') | currency:'GHS' }}
+        </div>
+      </div>
+      <div class="bg-white p-4 rounded-lg shadow-sm">
+        <div class="text-sm text-gray-500">Total Charges</div>
+        <div class="text-2xl font-bold text-red-600">
+          {{ calculateTotal('charges') | currency:'GHS' }}
+        </div>
+      </div>
+      <!-- <div class="bg-white p-4 rounded-lg shadow-sm">
+        <div class="text-sm text-gray-500">Net Amount</div>
+        <div class="text-2xl font-bold text-green-600">
+          {{ calculateTotal('actualAmount') | currency:'GHS' }}
+        </div>
+      </div> -->
+    </div>
+
+    <!-- Search -->
+    <div class="bg-white rounded-lg shadow-sm mb-6">
+      <div class="p-4">
+        <form [formGroup]="searchForm" (ngSubmit)="searchTransaction()" class="flex gap-3">
           <input
             type="text"
             formControlName="transactionId"
-            class="flex-1 rounded-lg"
-            placeholder="Enter Transaction ID or Phone Number"
+            class="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            placeholder="Search by Transaction ID or Phone Number"
           />
           <button
             type="submit"
             [disabled]="searchForm.invalid || loading"
-            class="inline-flex items-center px-6 py-2.5 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
           >
             <span *ngIf="!loading">Search</span>
-            <svg
-              *ngIf="loading"
-              class="animate-spin h-5 w-5"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                class="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                stroke-width="4"
-                fill="none"
-              />
-              <path
-                class="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              />
+            <svg *ngIf="loading" class="animate-spin h-5 w-5" viewBox="0 0 24 24">
+              <!-- Loading spinner path -->
             </svg>
           </button>
         </form>
       </div>
     </div>
 
-    <!-- Error Message -->
-    <div *ngIf="error" class="rounded-lg bg-red-50 p-4 mb-6">
-      <div class="flex">
-        <div class="flex-shrink-0">
-          <svg
-            class="h-5 w-5 text-red-400"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              fill-rule="evenodd"
-              d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-              clip-rule="evenodd"
-            />
-          </svg>
+    <!-- Transaction List -->
+    <div *ngIf="transactions.length > 0" class="space-y-4">
+      <div *ngFor="let tx of transactions" class="bg-white rounded-lg shadow-sm overflow-hidden">
+        <!-- Header -->
+        <div class="p-4 border-b border-gray-100 flex justify-between items-center">
+          <div class="flex items-center space-x-4">
+            <span [class]="getStatusClass(tx.status)">{{ tx.status }}</span>
+            <span class="text-gray-500">{{ tx.transactionRef }}</span>
+          </div>
+          <div class="flex items-center space-x-4">
+            <span class="text-gray-600">{{ formatDate(tx.createdAt) }}</span>
+            <button 
+              (click)="toggleDetails(tx)"
+              class="p-2 hover:bg-gray-100 rounded-full">
+              <i class="material-icons">{{ tx.showDetails ? 'expand_less' : 'expand_more' }}</i>
+            </button>
+          </div>
         </div>
-        <div class="ml-3">
-          <p class="text-sm text-red-700">{{ error }}</p>
+
+        <!-- Quick View -->
+        <div class="p-4 bg-gray-50 border-b border-gray-100">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <div class="text-sm text-gray-500">Amount</div>
+              <div class="font-medium">{{ formatAmount(tx.amount) }}</div>
+            </div>
+            <div>
+              <div class="text-sm text-gray-500">From</div>
+              <div class="font-medium">{{ tx.payment_account_name }}</div>
+              <div class="text-sm text-gray-500">{{ tx.payment_account_number }}</div>
+            </div>
+            <div>
+              <div class="text-sm text-gray-500">To</div>
+              <div class="font-medium">{{ tx.recipient_account_name }}</div>
+              <div class="text-sm text-gray-500">{{ tx.recipient_account_number }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Detailed View -->
+        <div *ngIf="tx.showDetails" class="p-4">
+          <div class="grid md:grid-cols-2 gap-6">
+            <!-- Left Column -->
+            <div class="space-y-4">
+              <div class="bg-gray-50 p-4 rounded-lg">
+                <h3 class="font-medium mb-3">Amount Details</h3>
+                <div class="space-y-2">
+                  <div class="flex justify-between">
+                    <span class="text-gray-500">Amount</span>
+                    <span class="font-medium">{{ formatAmount(tx.amount) }}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-gray-500">Charges</span>
+                    <span class="font-medium text-red-600">{{ formatAmount(tx.charges) }}</span>
+                  </div>
+                  <div class="flex justify-between">
+                    <span class="text-gray-500">Net Amount</span>
+                    <span class="font-medium text-green-600">{{ formatAmount(tx.actualAmount) }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-gray-50 p-4 rounded-lg">
+                <h3 class="font-medium mb-3">Payment Details</h3>
+                <div class="space-y-2">
+                  <div class="grid grid-cols-2 gap-2">
+                    <span class="text-gray-500">Name</span>
+                    <span class="font-medium">{{ tx.payment_account_name }}</span>
+                    <span class="text-gray-500">Number</span>
+                    <span class="font-medium">{{ tx.payment_account_number }}</span>
+                    <span class="text-gray-500">Type</span>
+                    <span class="font-medium">{{ tx.payment_account_type }}</span>
+                    <span class="text-gray-500">Issuer</span>
+                    <span class="font-medium">{{ tx.payment_account_issuer }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="space-y-4">
+              <div class="bg-gray-50 p-4 rounded-lg">
+                <h3 class="font-medium mb-3">Recipient Details</h3>
+                <div class="space-y-2">
+                  <div class="grid grid-cols-2 gap-2">
+                    <span class="text-gray-500">Name</span>
+                    <span class="font-medium">{{ tx.recipient_account_name }}</span>
+                    <span class="text-gray-500">Number</span>
+                    <span class="font-medium">{{ tx.recipient_account_number }}</span>
+                    <span class="text-gray-500">Type</span>
+                    <span class="font-medium">{{ tx.recipient_account_type }}</span>
+                    <span class="text-gray-500">Issuer</span>
+                    <span class="font-medium">{{ tx.recipient_account_issuer }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-gray-50 p-4 rounded-lg">
+                <h3 class="font-medium mb-3">Additional Info</h3>
+                <div class="space-y-2">
+                  <div class="grid grid-cols-2 gap-2">
+                    <span class="text-gray-500">Type</span>
+                    <span class="font-medium">{{ tx.transaction_type }}</span>
+                    <span class="text-gray-500">Channel</span>
+                    <span class="font-medium">{{ tx.channel }}</span>
+                    <span class="text-gray-500">Created</span>
+                    <span class="font-medium">{{ formatDate(tx.createdAt) }}</span>
+                    <span class="text-gray-500">Updated</span>
+                    <span class="font-medium">{{ formatDate(tx.updatedAt) }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Transaction Details -->
-    <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-      <!-- Header -->
-      <div class="border-b border-gray-200 px-6 py-4">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center space-x-4">
-            <h2 class="text-xl font-semibold text-gray-900">
-              Transaction Details
-            </h2>
-            <span
-              *ngIf="transaction"
-              [class]="getStatusClass(transaction.status)"
-            >
-              {{ transaction.status }}
-            </span>
-            <div
-              *ngIf="!transaction"
-              class="animate-pulse bg-gray-200 h-6 w-24 rounded-full"
-            ></div>
-          </div>
-          <div class="text-sm text-gray-600">
-            <span *ngIf="transaction"
-              >Ref: {{ transaction.transactionRef }}</span
-            >
-            <div
-              *ngIf="!transaction"
-              class="animate-pulse bg-gray-200 h-4 w-32 rounded"
-            ></div>
-          </div>
-        </div>
-      </div>
+    <!-- No Results -->
+    <div *ngIf="!transactions.length && !loading" class="text-center py-12 bg-white rounded-lg shadow-sm">
+      <p class="text-gray-500">No transactions found. Please try a different search.</p>
+    </div>
 
-      <!-- Content Grid -->
-      <div class="grid md:grid-cols-2 gap-8 p-6">
-        <!-- Amount Section -->
-        <div class="space-y-4">
-          <h3 class="text-lg font-medium text-gray-900">Amount Details</h3>
-          <dl class="space-y-3">
-            <ng-container *ngIf="transaction; else amountSkeleton">
-              <div class="flex justify-between py-2 border-b border-gray-100">
-                <dt class="text-gray-600">Amount</dt>
-                <dd class="font-medium text-gray-900">
-                  {{ formatAmount(transaction.amount) }}
-                </dd>
-              </div>
-              <div class="flex justify-between py-2 border-b border-gray-100">
-                <dt class="text-gray-600">Actual Amount</dt>
-                <dd class="font-medium text-gray-900">
-                  {{ formatAmount(transaction.actualAmount) }}
-                </dd>
-              </div>
-              <div class="flex justify-between py-2 border-b border-gray-100">
-                <dt class="text-gray-600">Charges</dt>
-                <dd class="font-medium text-gray-900">
-                  {{ formatAmount(transaction.charges) }}
-                </dd>
-              </div>
-            </ng-container>
-            <ng-template #amountSkeleton>
-              <div
-                *ngFor="let i of [1, 2, 3]"
-                class="flex justify-between py-2 border-b border-gray-100"
-              >
-                <div class="animate-pulse bg-gray-200 h-4 w-20 rounded"></div>
-                <div class="animate-pulse bg-gray-200 h-4 w-24 rounded"></div>
-              </div>
-            </ng-template>
-          </dl>
-        </div>
-
-        <!-- Payment Details -->
-        <div class="space-y-4">
-          <h3 class="text-lg font-medium text-gray-900">Payment Details</h3>
-          <dl class="space-y-3">
-            <ng-container *ngIf="transaction; else paymentSkeleton">
-              <div class="flex justify-between py-2 border-b border-gray-100">
-                <dt class="text-gray-600">Account Name</dt>
-                <dd class="font-medium text-gray-900">
-                  {{ transaction.payment_account_name }}
-                </dd>
-              </div>
-              <div class="flex justify-between py-2 border-b border-gray-100">
-                <dt class="text-gray-600">Account Number</dt>
-                <dd class="font-medium text-gray-900">
-                  {{ transaction.payment_account_number }}
-                </dd>
-              </div>
-              <div class="flex justify-between py-2 border-b border-gray-100">
-                <dt class="text-gray-600">Account Type</dt>
-                <dd class="font-medium text-gray-900">
-                  {{ transaction.payment_account_type }}
-                </dd>
-              </div>
-              <div class="flex justify-between py-2 border-b border-gray-100">
-                <dt class="text-gray-600">Issuer</dt>
-                <dd class="font-medium text-gray-900">
-                  {{ transaction.payment_account_issuer }}
-                </dd>
-              </div>
-            </ng-container>
-            <ng-template #paymentSkeleton>
-              <div
-                *ngFor="let i of [1, 2, 3, 4]"
-                class="flex justify-between py-2 border-b border-gray-100"
-              >
-                <div class="animate-pulse bg-gray-200 h-4 w-24 rounded"></div>
-                <div class="animate-pulse bg-gray-200 h-4 w-32 rounded"></div>
-              </div>
-            </ng-template>
-          </dl>
-        </div>
-
-        <!-- Recipient Details -->
-        <div class="space-y-4">
-          <h3 class="text-lg font-medium text-gray-900">Recipient Details</h3>
-          <dl class="space-y-3">
-            <ng-container *ngIf="transaction; else recipientSkeleton">
-              <div class="flex justify-between py-2 border-b border-gray-100">
-                <dt class="text-gray-600">Account Name</dt>
-                <dd class="font-medium text-gray-900">
-                  {{ transaction.recipient_account_name }}
-                </dd>
-              </div>
-              <div class="flex justify-between py-2 border-b border-gray-100">
-                <dt class="text-gray-600">Account Number</dt>
-                <dd class="font-medium text-gray-900">
-                  {{ transaction.recipient_account_number }}
-                </dd>
-              </div>
-              <div class="flex justify-between py-2 border-b border-gray-100">
-                <dt class="text-gray-600">Account Type</dt>
-                <dd class="font-medium text-gray-900">
-                  {{ transaction.recipient_account_type }}
-                </dd>
-              </div>
-            </ng-container>
-            <ng-template #recipientSkeleton>
-              <div
-                *ngFor="let i of [1, 2, 3]"
-                class="flex justify-between py-2 border-b border-gray-100"
-              >
-                <div class="animate-pulse bg-gray-200 h-4 w-24 rounded"></div>
-                <div class="animate-pulse bg-gray-200 h-4 w-32 rounded"></div>
-              </div>
-            </ng-template>
-          </dl>
-        </div>
-
-        <!-- Transaction Info -->
-        <div class="space-y-4">
-          <h3 class="text-lg font-medium text-gray-900">Transaction Info</h3>
-          <dl class="space-y-3">
-            <ng-container *ngIf="transaction; else transactionSkeleton">
-              <div class="flex justify-between py-2 border-b border-gray-100">
-                <dt class="text-gray-600">Type</dt>
-                <dd class="font-medium text-gray-900">
-                  {{ transaction.transaction_type }}
-                </dd>
-              </div>
-              <div class="flex justify-between py-2 border-b border-gray-100">
-                <dt class="text-gray-600">Channel</dt>
-                <dd class="font-medium text-gray-900">
-                  {{ transaction.channel }}
-                </dd>
-              </div>
-              <div class="flex justify-between py-2 border-b border-gray-100">
-                <dt class="text-gray-600">Created At</dt>
-                <dd class="font-medium text-gray-900">
-                  {{ formatDate(transaction.createdAt) }}
-                </dd>
-              </div>
-              <div class="flex justify-between py-2 border-b border-gray-100">
-                <dt class="text-gray-600">Last Updated</dt>
-                <dd class="font-medium text-gray-900">
-                  {{ formatDate(transaction.updatedAt) }}
-                </dd>
-              </div>
-            </ng-container>
-            <ng-template #transactionSkeleton>
-              <div
-                *ngFor="let i of [1, 2, 3, 4]"
-                class="flex justify-between py-2 border-b border-gray-100"
-              >
-                <div class="animate-pulse bg-gray-200 h-4 w-20 rounded"></div>
-                <div class="animate-pulse bg-gray-200 h-4 w-28 rounded"></div>
-              </div>
-            </ng-template>
-          </dl>
-        </div>
-      </div>
+    <!-- Loading State -->
+    <div *ngIf="loading" class="flex justify-center py-12">
+      <div class="animate-spin rounded-full h-8 w-8 border-2 border-blue-500 border-t-transparent"></div>
     </div>
   </div>
 </div>

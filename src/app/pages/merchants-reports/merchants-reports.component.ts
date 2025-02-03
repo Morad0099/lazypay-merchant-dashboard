@@ -47,6 +47,7 @@ interface Transaction {
   createdAt: string;
   merchantId: any;
   customerId: any;
+  walletType: string;
 }
 
 interface ReportResponse {
@@ -62,6 +63,25 @@ interface ReportResponse {
   };
 }
 
+interface AnalyticsStats {
+  totalCount: number;
+  successfulCount: number;
+  failedCount: number;
+  pendingCount: number;
+  growthRate: number;
+  totalAmount: number;
+  netAmount: number;
+  charges: number;
+}
+
+const paymentIssuerImages: { [key: string]: string } = {
+  mtn: 'assets/images/mtn.png',
+  vodafone: 'assets/images/vodafone.jpg',
+  airteltigo: 'assets/images/download.png',
+  btc: 'assets/images/bitcoin.svg',
+  usdt: 'assets/images/usdt.svg',
+  doron: 'assets/images/doron.png',
+};
 @Component({
   selector: 'app-reports',
   standalone: true,
@@ -85,10 +105,16 @@ interface ReportResponse {
             Total Transactions
           </p>
           <p class="text-2xl font-bold text-gray-900">
-            {{ reportStats.count || 0 }}
+            {{ reportStats.count }}
           </p>
-          <div class="mt-2 text-blue-600 text-sm">
-            <span>+12.5% vs last month</span>
+          <div
+            class="mt-2 text-sm"
+            [ngClass]="{
+              'text-green-600': analytics.growthRate > 0,
+              'text-red-600': analytics.growthRate < 0
+            }"
+          >
+            <span>{{ analytics.growthRate }}% vs last month</span>
           </div>
         </div>
 
@@ -97,10 +123,15 @@ interface ReportResponse {
         >
           <p class="text-green-600 mb-2 text-sm font-medium">Total Amount</p>
           <p class="text-2xl font-bold text-gray-900">
-            {{ formatCurrency(reportStats.amount || 0) }}
+            {{ formatCurrency(reportStats.amount, 'FIAT') }}
           </p>
           <div class="mt-2 text-green-600 text-sm">
-            <span>+8.3% vs last month</span>
+            <span
+              >{{
+                reportStats.amount / reportStats.count | currency
+              }}
+              avg/tx</span
+            >
           </div>
         </div>
 
@@ -109,10 +140,16 @@ interface ReportResponse {
         >
           <p class="text-indigo-600 mb-2 text-sm font-medium">Net Amount</p>
           <p class="text-2xl font-bold text-gray-900">
-            {{ formatCurrency(reportStats.actualAmount || 0) }}
+            {{ formatCurrency(reportStats.actualAmount, 'FIAT') }}
           </p>
           <div class="mt-2 text-indigo-600 text-sm">
-            <span>+10.2% vs last month</span>
+            <span
+              >{{
+                ((reportStats.actualAmount / reportStats.amount) * 100).toFixed(
+                  1
+                )
+              }}% of total</span
+            >
           </div>
         </div>
 
@@ -121,10 +158,14 @@ interface ReportResponse {
         >
           <p class="text-red-600 mb-2 text-sm font-medium">Total Charges</p>
           <p class="text-2xl font-bold text-gray-900">
-            {{ formatCurrency(reportStats.charges || 0) }}
+            {{ formatCurrency(reportStats.charges, 'FIAT') }}
           </p>
           <div class="mt-2 text-red-600 text-sm">
-            <span>-2.1% vs last month</span>
+            <span
+              >{{
+                ((reportStats.charges / reportStats.amount) * 100).toFixed(1)
+              }}% fee rate</span
+            >
           </div>
         </div>
       </div>
@@ -326,16 +367,22 @@ interface ReportResponse {
                       >({{ tx.payment_account_issuer }}
                       {{ tx.payment_account_type }})</span
                     >
+                    <img
+                      *ngIf="getPaymentIssuerImage(tx.payment_account_issuer)"
+                      [src]="getPaymentIssuerImage(tx.payment_account_issuer)"
+                      alt="{{ tx.payment_account_issuer }}"
+                      class="w-6 h-6 inline-block ml-2"
+                    />
                   </div>
                 </td>
                 <td class="px-6 py-4 text-sm text-gray-900">
-                  {{ formatCurrency(tx.amount) }}
+                  {{ formatCurrency(tx.amount, tx.walletType) }}
                 </td>
                 <td class="px-6 py-4 text-sm text-red-600">
-                  {{ formatCurrency(tx.charges) }}
+                  {{ formatCurrency(tx.charges, tx.walletType) }}
                 </td>
                 <td class="px-6 py-4 text-sm font-medium text-green-600">
-                  {{ formatCurrency(tx.actualAmount) }}
+                  {{ formatCurrency(tx.actualAmount, tx.walletType) }}
                 </td>
                 <td class="px-6 py-4">
                   <span
@@ -492,6 +539,29 @@ export class ReportsComponent implements OnInit {
   pageSize = 5;
   maxVisiblePages = 5;
 
+  lastMonthStats: AnalyticsStats = {
+    totalCount: 0,
+    successfulCount: 0,
+    failedCount: 0,
+    pendingCount: 0,
+    growthRate: 0,
+    totalAmount: 0,
+    netAmount: 0,
+    charges: 0,
+  };
+
+  private _filteredTransactions: Transaction[] = [];
+  private _analytics: AnalyticsStats = {
+    totalCount: 0,
+    successfulCount: 0,
+    failedCount: 0,
+    pendingCount: 0,
+    growthRate: 0,
+    totalAmount: 0,
+    netAmount: 0,
+    charges: 0,
+  };
+
   constructor(private http: HttpClient, private store: Store) {}
 
   closeTransactionModal(): void {
@@ -512,19 +582,16 @@ export class ReportsComponent implements OnInit {
     this.filters.startDate = sevenDaysAgo.toISOString().split('T')[0];
   }
 
-  // Modify your existing generateReport method to include search
   get filteredTransactions(): Transaction[] {
-    return this.transactions.filter((tx) => {
+    const filtered = this.transactions.filter((tx) => {
       const phoneMatch =
         !this.searchFilters.phone ||
         tx.payment_account_number.includes(this.searchFilters.phone);
-
       const refMatch =
         !this.searchFilters.transactionRef ||
         tx.transactionRef
           .toLowerCase()
           .includes(this.searchFilters.transactionRef.toLowerCase());
-
       const nameMatch =
         !this.searchFilters.customerName ||
         tx.payment_account_name
@@ -533,6 +600,55 @@ export class ReportsComponent implements OnInit {
 
       return phoneMatch && refMatch && nameMatch;
     });
+
+    this._analytics = this.calculateAnalytics(filtered);
+    this.reportStats = {
+      count: this._analytics.totalCount,
+      amount: this._analytics.totalAmount,
+      actualAmount: this._analytics.netAmount,
+      charges: this._analytics.charges,
+    };
+
+    return filtered;
+  }
+
+  get analytics(): AnalyticsStats {
+    return this._analytics;
+  }
+
+  calculateAnalytics(transactions: Transaction[]): AnalyticsStats {
+    const currentDate = new Date();
+    const lastMonthStart = new Date();
+    lastMonthStart.setMonth(currentDate.getMonth() - 1);
+
+    const lastMonthTransactions = this.transactions.filter((tx) => {
+      const txDate = new Date(tx.createdAt);
+      return (
+        txDate >= lastMonthStart && txDate < new Date(this.filters.startDate)
+      );
+    });
+
+    const currentStats = {
+      totalCount: transactions.length,
+      successfulCount: transactions.filter((tx) => tx.status === 'PAID').length,
+      failedCount: transactions.filter((tx) => tx.status === 'FAILED').length,
+      pendingCount: transactions.filter((tx) => tx.status === 'PENDING').length,
+      totalAmount: transactions.reduce((sum, tx) => sum + tx.amount, 0),
+      netAmount: transactions.reduce((sum, tx) => sum + tx.actualAmount, 0),
+      charges: transactions.reduce((sum, tx) => sum + tx.charges, 0),
+    };
+
+    const lastMonthTotalCount = lastMonthTransactions.length;
+    const growthRate = lastMonthTotalCount
+      ? ((currentStats.totalCount - lastMonthTotalCount) /
+          lastMonthTotalCount) *
+        100
+      : 0;
+
+    return {
+      ...currentStats,
+      growthRate: Number(growthRate.toFixed(1)),
+    };
   }
 
   private getHeaders(): HttpHeaders {
@@ -580,6 +696,20 @@ export class ReportsComponent implements OnInit {
     if (page >= 1 && page <= this.totalPages) {
       this.currentPage = page;
     }
+  }
+
+  getPaymentIssuerImage(issuer: string): string | null {
+    const key = issuer.toLowerCase();
+    return paymentIssuerImages[key] || null;
+  }
+
+  // Updated formatCurrency method to handle different wallet types
+  formatCurrency(amount: number, walletType: string): string {
+    const currency = walletType === 'FIAT' ? 'GHS' : 'USD';
+    return new Intl.NumberFormat('en-GH', {
+      style: 'currency',
+      currency: currency,
+    }).format(amount);
   }
 
   async generateReport() {
@@ -699,12 +829,12 @@ export class ReportsComponent implements OnInit {
     return date.toISOString().split('T')[0];
   }
 
-  formatCurrency(amount: number): string {
-    return new Intl.NumberFormat('en-GH', {
-      style: 'currency',
-      currency: 'GHS',
-    }).format(amount);
-  }
+  // formatCurrency(amount: number): string {
+  //   return new Intl.NumberFormat('en-GH', {
+  //     style: 'currency',
+  //     currency: 'GHS',
+  //   }).format(amount);
+  // }
 
   viewTransactionDetails(transaction: any) {
     // Here you can implement the logic to show the transaction details modal

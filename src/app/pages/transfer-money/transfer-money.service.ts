@@ -8,6 +8,7 @@ import {
   WithdrawCryptoDetails,
 } from './money-transfer.types';
 import {
+  catchError,
   combineLatest,
   debounceTime,
   distinctUntilChanged,
@@ -15,12 +16,18 @@ import {
   filter,
   interval,
   map,
+  Observable,
   Subject,
   Subscription,
+  switchMap,
+  take,
   takeUntil,
   takeWhile,
+  throwError,
 } from 'rxjs';
 import { AuthState } from '../../state/apps/app.states';
+import { HttpClient } from '@angular/common/http';
+import API from '../../constants/api.constant';
 
 type Tab = 'send' | 'fund' | 'withdraw' | 'crypto' | 'deposit';
 
@@ -55,6 +62,7 @@ export class TransferMoneyService implements OnDestroy {
   errorMessage = '';
   isVerifyingAccount = false;
   isSendingOtp: boolean = false;
+  public stopPolling$ = new Subject<void>();
 
   walletGenerated = false;
   isGenerating = false;
@@ -110,7 +118,8 @@ export class TransferMoneyService implements OnDestroy {
   constructor(
     private fb: FormBuilder,
     private store: Store,
-    private moneyTransferService: MoneyTransferService
+    private moneyTransferService: MoneyTransferService,
+    private http: HttpClient
   ) {
     this.initializeForms();
   }
@@ -124,6 +133,7 @@ export class TransferMoneyService implements OnDestroy {
       amount: ['', [Validators.required, Validators.min(1)]],
       description: ['', Validators.required],
       otp: [''],
+      // cryptoType: [''],
     });
 
     this.fundWalletForm = this.fb.group({
@@ -137,12 +147,20 @@ export class TransferMoneyService implements OnDestroy {
       cryptoType: ['usdt', Validators.required],
       walletAddress: ['', [Validators.required, Validators.minLength(26)]],
       amount: ['', [Validators.required, Validators.min(10)]],
+      accountName: ['', Validators.required],
+      description: ['', Validators.required],
+      otp: ['']
     });
 
     this.withdrawForm = this.fb.group({
       withdrawalMethod: ['bank', Validators.required],
       cryptoType: ['usdt', Validators.required],
-      amount: ['', [Validators.required, Validators.min(10)]],
+      account_issuer: ['', Validators.required],
+      account_number: ['', [Validators.required, Validators.minLength(10)]],
+      account_name: ['', Validators.required],
+      amount: ['', [Validators.required, Validators.min(1)]],
+      description: ['', Validators.required],
+      otp: ['']
     });
 
     this.depositForm = this.fb.group({
@@ -230,6 +248,37 @@ export class TransferMoneyService implements OnDestroy {
         }) ?? new Subscription();
   }
 
+  private paymentTimerSubscription: Subscription | undefined;
+
+// startPaymentTimer() {
+//   // Example: Start a 10-minute timer
+//   const timerDuration = 600; // 10 minutes in seconds
+//   this.paymentTimer = this.formatTime(timerDuration);
+
+//   this.paymentTimerSubscription = interval(1000).subscribe(() => {
+//     timerDuration--;
+//     this.paymentTimer = this.formatTime(timerDuration);
+
+//     if (timerDuration <= 0) {
+//       this.stopPaymentTimer();
+//       this.transactionStatus = -1; // Mark as expired
+//     }
+//   });
+// }
+
+stopPaymentTimer() {
+  if (this.paymentTimerSubscription) {
+    this.paymentTimerSubscription.unsubscribe();
+    this.paymentTimerSubscription = undefined;
+  }
+}
+
+private formatTime(seconds: number): string {
+  const minutes = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
+}
+
   getDepositAddress(): string {
     const type = this.depositForm.get('cryptoType')?.value;
     const network = this.depositForm.get('network')?.value;
@@ -295,6 +344,52 @@ export class TransferMoneyService implements OnDestroy {
     });
   }
 
+  ngOnDestroys() {
+    this.stopPolling$.next(); // Stop polling when the component is destroyed
+    this.stopPolling$.complete();
+  }
+
+  private setupWithdrawFormSubscriptions() {
+    // Monitor form changes for real-time calculations
+    this.withdrawform$ = combineLatest([
+      this.withdrawForm.get('amount')?.valueChanges ?? EMPTY,
+      this.withdrawForm.get('withdrawalMethod')?.valueChanges ?? EMPTY,
+      this.withdrawForm.get('cryptoType')?.valueChanges ?? EMPTY,
+    ]).pipe(
+      filter(([amount, method, type]) => 
+        amount !== null && method !== null && type !== null
+      ),
+      debounceTime(300),
+      distinctUntilChanged(),
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: ([amount, method, cryptoType]) => {
+        if (amount >= 10) {
+          this.calculateWithdrawalDetails(amount, method, cryptoType);
+        }
+      }
+    });
+  }
+
+
+  private calculateWithdrawalDetails(amount: number, method: string, cryptoType: any) {
+    this.moneyTransferService.calculateCryptoWithdrawal({
+      cryptoType,
+      accountType: method === 'bank' ? 'banktrfnrt' : 'momo',
+      amount
+    }).pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: (data) => {
+        this.withdrawCryptoDetails = data;
+      },
+      error: (err) => {
+        console.error('Failed to calculate withdrawal:', err);
+      }
+    });
+  }
+  
+
   async fetchBanks() {
     try {
       const response = await this.moneyTransferService.getBanks();
@@ -326,14 +421,19 @@ export class TransferMoneyService implements OnDestroy {
   }
 
   get canVerify(): boolean {
-    const form = this.sendMoneyForm;
-    return (
-      form.get('account_number')!.valid && form.get('account_issuer')!.valid
-    );
+    if (this.activeTab === 'send') {
+      const form = this.sendMoneyForm;
+      return form.get('account_number')!.valid && form.get('account_issuer')!.valid;
+    } else if (this.activeTab === 'withdraw') {
+      const form = this.withdrawForm;
+      return form.get('account_number')!.valid && form.get('account_issuer')!.valid;
+    }
+    return false;
   }
 
   async verifyAccount() {
-    const form = this.sendMoneyForm;
+    if (this.activeTab == 'send') {
+      const form = this.sendMoneyForm;
     const number = form.get('account_number')?.value;
     const bankCode = form.get('account_issuer')?.value;
     const accountType = form.get('transferType')?.value;
@@ -358,24 +458,50 @@ export class TransferMoneyService implements OnDestroy {
     } finally {
       this.isVerifyingAccount = false; // Stop the loader
     }
+    } else if (this.activeTab == 'withdraw') {
+      const form = this.withdrawForm;
+    const number = form.get('account_number')?.value;
+    const bankCode = form.get('account_issuer')?.value;
+    const accountType = form.get('withdrawalMethod')?.value;
+    this.isVerifyingAccount = true;
+    try {
+      const response = await this.moneyTransferService.verifyAccount(
+        number,
+        bankCode,
+        accountType
+      );
+      if (response?.success && response.data.success) {
+        this.isVerifyingAccount = true;
+        form.patchValue({ account_name: response.data.data });
+        this.isAccountVerified = true;
+      } else {
+        this.showError(
+          'Account verification failed. Please check the details and try again.'
+        );
+      }
+    } catch (error) {
+      this.showError('Failed to verify account. Please try again.');
+    } finally {
+      this.isVerifyingAccount = false; // Stop the loader
+    }
+      
+    }
+    
   }
 
   async requestOtp() {
-    const userEmail = this.store.selectSnapshot(
-      (state) => state.auth.user?.email
-    );
-    const userPhone = this.store.selectSnapshot(
-      (state) => state.auth.user?.phone
-    );
-
+    if (this.isSendingOtp) return;
+  
+    const userEmail = this.store.selectSnapshot((state) => state.auth.user?.email);
+    const userPhone = this.store.selectSnapshot((state) => state.auth.user?.phone);
+  
     try {
       this.isSendingOtp = true;
-      const response = await this.moneyTransferService.sendOtp(
-        userEmail,
-        userPhone
-      );
+      const response = await this.moneyTransferService.sendOtp(userEmail, userPhone);
+      
       if (response?.success) {
         this.showOtpSection = true;
+        this.showSuccess('OTP sent successfully');
       } else {
         this.showError('Failed to send OTP. Please try again.');
       }
@@ -388,6 +514,46 @@ export class TransferMoneyService implements OnDestroy {
 
   async resendOtp() {
     await this.requestOtp();
+  }
+
+  async processWithdrawal() {
+    if (!this.sendMoneyForm.valid) return;
+    this.isSubmitting = true;
+  
+    try {
+      const payload = this.buildWithdrawPayload();
+      const response = await this.moneyTransferService.sendMoney(payload);
+  
+      if (response?.success) {
+        this.showSuccess('Withdrawal initiated successfully!');
+        this.transactionStatus = 1;
+        this.startPaymentTimer();
+        this.initializeTransactionTracking(response.transactionId);
+      } else {
+        this.showError(response?.message || 'Failed to initiate withdrawal.');
+      }
+    } catch (error: any) {
+      this.showError(error?.message || 'Withdrawal failed. Please try again.');
+    } finally {
+      this.isSubmitting = false;
+    }
+  }
+  
+  private buildWithdrawPayload(): any {
+    const user = this.store.selectSnapshot(AuthState.user);
+    const form = this.sendMoneyForm.value;
+  
+    return {
+      merchantId: user.merchantId?._id,
+      account_type: form.cryptoType,
+      transferMethod: form.transferMethod,
+      account_issuer: form.account_issuer,
+      account_number: form.account_number,
+      account_name: form.account_name,
+      amount: form.amount.toString(),
+      description: form.description,
+      otp: form.otp
+    };
   }
 
   async onSendMoney() {
@@ -545,30 +711,93 @@ export class TransferMoneyService implements OnDestroy {
   }
 
   async onCryptoTransfer() {
+    // If OTP is needed but not shown yet, request it
+    if (!this.showOtpSection) {
+      await this.requestOtp();
+      this.showOtpSection = true;
+      return;
+    }
+  
     if (!this.cryptoForm.valid) return;
     this.isSubmitting = true;
+  
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      this.showSuccess('Crypto transfer successful!');
-      this.resetForms();
-    } catch (error) {
-      this.showError('Transfer failed');
+      const payload = this.buildSendCryptoPayload();
+      const response = await this.moneyTransferService.sendMoney(payload);
+  
+      if (response?.success) {
+        this.showSuccess('Crypto transfer initiated successfully!');
+        this.transactionStatus = 1;
+        this.startPaymentTimer();
+        this.initializeTransactionTracking(response.transactionId);
+        this.showOtpSection = false;  // Reset OTP section
+      } else {
+        this.showError(response?.message || 'Failed to initiate transfer.');
+      }
+    } catch (error: any) {
+      this.showError(error?.message || 'Transfer failed. Please try again.');
     } finally {
       this.isSubmitting = false;
     }
   }
+  
+  private buildSendCryptoPayload(): any {
+    const user = this.store.selectSnapshot(AuthState.user);
+    const { cryptoType, walletAddress, amount, accountName, description, otp } = this.cryptoForm.value;
+  
+    return {
+      merchantId: user.merchantId?._id,
+      account_type: cryptoType,
+      amount: amount,
+      account_number: walletAddress,
+      account_name: accountName,
+      description: description,
+      otp: otp,
+      // Add other required fields based on your API
+    };
+  }
 
-  async onWithdraw() {
-    if (!this.withdrawForm.valid) return;
+  private cryptoSendPayload(): any {
+    const user = this.store.selectSnapshot(AuthState.user);
+    const { withdrawalMethod, account_issuer, account_number, amount, account_name, description, otp } = this.withdrawForm.value;
+  
+    return {
+      merchantId: user.merchantId?._id,
+      account_type: withdrawalMethod,
+      amount: amount,
+      account_issuer: account_issuer,
+      account_number: account_number,
+      account_name: account_name,
+      description: description,
+      otp: otp,
+      // Add other required fields based on your API
+    };
+  }
+
+  async onWithdraw(): Promise<void> {
+    if (!this.withdrawForm.valid || this.isSubmitting) return;
+  
     this.isSubmitting = true;
+    const form = this.withdrawForm.value;
+    const user = this.store.selectSnapshot(AuthState.user);
+  
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      this.showSuccess('Withdrawal initiated successfully!');
-      this.resetForms();
+      const payload = this.cryptoSendPayload();
+    
+      const response = await this.moneyTransferService.sendMoney(payload);
+  
+      if (response?.success) {
+        this.showSuccess('Withdrawal initiated successfully!');
+        this.transactionStatus = 1; // Processing
+        this.startPaymentTimer();
+        this.initializeTransactionTracking(response.transactionId);
+      } else {
+        this.showError(response?.message || 'Withdrawal failed. Please try again.');
+      }
     } catch (error) {
-      this.showError('Withdrawal failed');
+      console.error('Withdrawal failed:', error);
+      this.transactionStatus = -1; // Failed
+      this.showError('Withdrawal failed. Please try again.');
     } finally {
       this.isSubmitting = false;
     }
@@ -584,20 +813,22 @@ export class TransferMoneyService implements OnDestroy {
         account_type: cryptoType,
         amount: amount,
       };
+  
       this.moneyTransferService.deposit(depositPayload).subscribe({
         next: (response) => {
           if (response.success) {
             this.walletGenerated = true;
             this.depositResponse = response;
-
+  
             this.expectedCryptoAmount = this.depositResponse.amount;
             this.networkFee = this.depositResponse.networkFee;
             this.transactionStatus = 1; // Set to "Waiting for Payment"
-
+  
             // Start payment timer
             this.startPaymentTimer();
-            // Initialize transaction tracking
-            this.initializeTransactionTracking();
+  
+            // Start polling for transaction status
+            this.initializeTransactionTracking(response.transactionId);
           } else {
             console.log(response.message);
           }
@@ -616,11 +847,69 @@ export class TransferMoneyService implements OnDestroy {
     }
   }
 
-  initializeTransactionTracking() {
-    if (this.depositResponse?.destination) {
-      // Initialize WebSocket connection
-      // Subscribe to transaction updates
+  initializeTransactionTracking(transactionId: string) {
+    if (!transactionId) {
+      console.error('Transaction ID is required for tracking.');
+      return;
     }
+  
+    // Start polling for transaction status
+    this.pollTransactionStatus(transactionId).subscribe({
+      next: (status) => {
+        console.log('Transaction status update:', status);
+  
+        if (status.success) {
+          switch (status.status) {
+            case 'INITIATED':
+              this.transactionStatus = 1; // Waiting for Payment
+              break;
+            case 'PAID':
+              this.transactionStatus = 4; // Payment Completed
+              this.stopPaymentTimer(); // Stop the payment timer
+              this.stopPolling$.next(); // Stop polling
+              break;
+            case 'FAILED':
+              this.transactionStatus = -1; // Error state
+              this.stopPaymentTimer(); // Stop the payment timer
+              this.stopPolling$.next(); // Stop polling
+              break;
+            default:
+              console.warn('Unknown transaction status:', status.status);
+          }
+        } else {
+          console.error('Transaction failed:', status.message);
+          this.transactionStatus = -1; // Error state
+          this.stopPaymentTimer(); // Stop the payment timer
+          this.stopPolling$.next(); // Stop polling
+        }
+      },
+      error: (err) => {
+        console.error('Error polling transaction status:', err);
+        this.transactionStatus = -1; // Error state
+        this.stopPaymentTimer(); // Stop the payment timer
+        this.stopPolling$.next(); // Stop polling
+      },
+    });
+  }
+
+  
+  verifyBitcoinPayment(id: string): Observable<any> {
+    return this.http.get(`${API}/transactions/status/${id}`).pipe(
+      catchError((err) => throwError(() => err)),
+      map((res: any) => {
+        if (!res.success) {
+          throw new Error(res.message);
+        }
+        return res;
+      })
+    );
+  }
+
+  pollTransactionStatus(id: string, intervalTime: number = 5000): Observable<any> {
+    return interval(intervalTime).pipe(
+      switchMap(() => this.verifyBitcoinPayment(id)),
+      takeUntil(this.stopPolling$) // Stop polling when stopPolling$ emits
+    );
   }
 
   cleanupTransactionTracking() {
@@ -686,5 +975,7 @@ export class TransferMoneyService implements OnDestroy {
   ngOnDestroy(): void {
     this.cryptoform$.unsubscribe();
     this.withdrawform$.unsubscribe();
+    this.stopPolling$.next(); // Stop polling
+    this.stopPolling$.complete(); // Clean up the subject
   }
 }

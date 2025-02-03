@@ -276,7 +276,7 @@ export class SettlementsComponent implements OnInit {
         (state) => state.auth.user?.merchantId?._id
       );
       const response = await this.http
-        .get<any>(`https://lazypaygh.com/api/settlements/get/${merchantId}`, {
+        .get<any>(`https://doronpay.com/api/settlements/merchant/${merchantId}`, {
           headers: this.getHeaders(),
         })
         .toPromise();
