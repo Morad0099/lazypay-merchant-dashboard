@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { FilterChangedEvent } from 'ag-grid-community';
-import { Observable, catchError, of, take, tap } from 'rxjs';
+import { Observable, catchError, map, of, take, tap, throwError } from 'rxjs';
 import API from '../constants/api.constant';
 
 export interface Admin {
@@ -132,4 +132,5 @@ export class AdminService {
       })
     );
   }
+
 }

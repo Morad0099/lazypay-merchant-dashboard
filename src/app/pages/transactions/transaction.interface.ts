@@ -30,6 +30,7 @@ export interface Transaction {
     statusCheckResponse?: string;
     balanceAfterCredit?: number;
     balanceBeforCredit?: number;
+    recipient_account_issuer?: string;
     transaction?: {
       GTBTransId: string;
       PartnerTransId: string;

@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { TransferMoneyService } from './transfer-money.service';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'deposit-crypto',
@@ -203,13 +204,14 @@ import { ReactiveFormsModule } from '@angular/forms';
         </form>
 
         <!-- Transaction Status -->
-        <div class="border-t border-gray-200  mt-4 p-4">
+        <div class="border-t border-gray-200 mt-4 p-4">
           <h3 class="text-sm font-semibold text-gray-700 mb-3">
             Transaction Status
           </h3>
 
           <!-- Status Timeline -->
           <div class="space-y-4">
+            <!-- Waiting for Payment -->
             <div class="flex items-center gap-3">
               <div
                 [class]="
@@ -231,49 +233,7 @@ import { ReactiveFormsModule } from '@angular/forms';
               </div>
             </div>
 
-            <div class="flex items-center gap-3">
-              <div
-                [class]="
-                  'w-8 h-8 rounded-full flex items-center justify-center ' +
-                  ($service.transactionStatus >= 2
-                    ? 'bg-green-100 text-green-600'
-                    : 'bg-gray-100 text-gray-400')
-                "
-              >
-                <i class="material-icons text-sm">done</i>
-              </div>
-              <div class="flex-1">
-                <p class="text-sm font-medium text-gray-700">
-                  Transaction Detected
-                </p>
-                <p class="text-xs text-gray-500">
-                  {{ $service.transactionHash || 'Waiting for transaction' }}
-                </p>
-              </div>
-            </div>
-
-            <div class="flex items-center gap-3">
-              <div
-                [class]="
-                  'w-8 h-8 rounded-full flex items-center justify-center ' +
-                  ($service.transactionStatus >= 3
-                    ? 'bg-green-100 text-green-600'
-                    : 'bg-gray-100 text-gray-400')
-                "
-              >
-                <i class="material-icons text-sm">verified</i>
-              </div>
-              <div class="flex-1">
-                <p class="text-sm font-medium text-gray-700">Confirmations</p>
-                <p class="text-xs text-gray-500">
-                  {{ $service.confirmations }}/{{
-                    $service.requiredConfirmations
-                  }}
-                  confirmations
-                </p>
-              </div>
-            </div>
-
+            <!-- Deposit Completed -->
             <div class="flex items-center gap-3">
               <div
                 [class]="
@@ -291,6 +251,26 @@ import { ReactiveFormsModule } from '@angular/forms';
                 </p>
                 <p class="text-xs text-gray-500">
                   Funds will be credited to your account
+                </p>
+              </div>
+            </div>
+
+            <!-- Error State -->
+            <div
+              class="flex items-center gap-3"
+              *ngIf="$service.transactionStatus === -1"
+            >
+              <div
+                class="w-8 h-8 rounded-full flex items-center justify-center bg-red-100 text-red-600"
+              >
+                <i class="material-icons text-sm">error</i>
+              </div>
+              <div class="flex-1">
+                <p class="text-sm font-medium text-gray-700">
+                  Transaction Failed
+                </p>
+                <p class="text-xs text-gray-500">
+                  Please try again or contact support
                 </p>
               </div>
             </div>
@@ -350,14 +330,18 @@ import { ReactiveFormsModule } from '@angular/forms';
     </div>
   `,
 })
-export class DepositCryptoComponent implements OnInit {
+export class DepositCryptoComponent implements OnInit, OnDestroy {
+  private transactionStatusSubscription: Subscription | undefined;
+
   constructor(public $service: TransferMoneyService) {}
 
-  ngOnInit() {
-    this.$service.initializeTransactionTracking();
-  }
+  ngOnInit() {}
 
   ngOnDestroy() {
-    this.$service.cleanupTransactionTracking();
+    if (this.transactionStatusSubscription) {
+      this.transactionStatusSubscription.unsubscribe();
+    }
+    this.$service.stopPolling$.next(); // Stop polling when the component is destroyed
+    this.$service.stopPolling$.complete(); // Clean up the subject
   }
 }

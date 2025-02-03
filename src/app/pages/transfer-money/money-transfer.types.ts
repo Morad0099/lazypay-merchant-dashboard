@@ -25,6 +25,7 @@ export interface TransactionResponse {
   success: boolean;
   message: string;
   data?: any;
+  transactionId: string;
 }
 
 export interface SendMoneyPayload {
