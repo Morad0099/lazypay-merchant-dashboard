@@ -10,6 +10,19 @@ import { SettlementsComponent } from './pages/merchant-settlements/merchant-sett
 import { MoneyTransferComponent } from './pages/transfer-money/money-transfer.component';
 import { TransactionDetailsComponent } from './pages/transactions/transaction-details.component';
 import { MerchantWalletsComponent } from './pages/merchant-wallets/merchant-wallets.component';
+import { RegisterComponent } from './pages/auth-layout.ts/register/register.component';
+import { KycComponent } from './pages/kyc/kyc.component';
+import { KycGuard } from './guard/kyc.guard';
+import { PayrollListComponent } from './pages/payroll/payroll-list.component';
+import { CreatePayrollComponent } from './pages/payroll/create-payroll.component';
+import { PayrollDetailComponent } from './pages/payroll/payroll-detail.component';
+import { RecipientListComponent } from './pages/payroll/recipient-list.component';
+import { RecipientFormComponent } from './pages/payroll/recipient-form.component';
+import { RecurringPayrollListComponent } from './pages/payroll/recurring-payroll-list.component';
+import { CreateRecurringPayrollComponent } from './pages/payroll/create-recurring-payroll.component';
+import { RecurringPayrollDetailComponent } from './pages/payroll/recurring-payroll-detail.component';
+import { UpcomingPayrollRunsComponent } from './pages/payroll/upcoming-payroll-runs.component';
+import { PaymentLinkGeneratorComponent } from './pages/payment-link-generator/payment-link-generator.component';
 
 export const routes: Routes = [
   {
@@ -20,12 +33,16 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'auth/register',
+    component: RegisterComponent,
+  },
+  {
     path: '',
     loadComponent: () =>
       import('../app/pages/main-layout/main-layout.component').then(
         (m) => m.MainLayoutComponent
       ),
-    canActivate: [AuthGuard],
+    canActivate: [AuthGuard,KycGuard],
     children: [
       // {
       //   path: 'payment-reconciliation',
@@ -55,6 +72,10 @@ export const routes: Routes = [
         component: MerchantWalletsComponent,
       },
       {
+        path: 'kyc',
+        component: KycComponent,
+      },
+      {
         path: 'admins',
         loadComponent: () =>
           import('./pages/admin-management/admin-management.component').then(
@@ -80,6 +101,55 @@ export const routes: Routes = [
       {
         path: 'transaction',
         component: TransactionDetailsComponent,
+      },
+      { 
+        path: 'payroll', 
+        component: PayrollListComponent
+      },
+      {
+        path: 'payroll/create',
+        component: CreatePayrollComponent
+      },
+      {
+        path: 'payroll/:id',
+        component: PayrollDetailComponent
+      },
+      {
+        path: 'payroll/:id/approve',
+        component: PayrollDetailComponent
+      },
+      {
+        path: 'recipients',
+        component: RecipientListComponent
+      },
+      { 
+        path: 'payment-links', 
+        component: PaymentLinkGeneratorComponent 
+      },
+
+      {
+        path: 'recipient/create',
+        component: RecipientFormComponent
+      },
+      {
+        path: 'recipient/edit/:id',
+        component: RecipientFormComponent
+      },
+      {
+        path: 'recurring',
+        component: RecurringPayrollListComponent
+      },
+      {
+        path: 'recurring/create',
+        component: CreateRecurringPayrollComponent
+      },
+      {
+        path: 'recurring/:id',
+        component: RecurringPayrollDetailComponent
+      },
+      {
+        path: 'upcoming',
+        component: UpcomingPayrollRunsComponent
       },
       // Add other child routes here
       { path: '', redirectTo: 'wallets', pathMatch: 'full' },

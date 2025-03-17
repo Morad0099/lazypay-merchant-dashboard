@@ -27,6 +27,12 @@ export const Routes: RouteInfo[] = [
   { path: 'settlements', title: 'Settlements', class: 'false' },
   { path: 'transfer', title: 'Transfer', class: 'false' },
   { path: 'transaction', title: 'Transaction Filters', class: 'false' },
+  { path: 'payroll', title: 'Payroll', class: 'false' },
+  { path: 'recipients', title: 'Recipients', class: 'false' },
+  { path: 'recurring', title: 'Recurring Payroll', class: 'false' },
+  { path: 'upcoming', title: 'Upcoming Payroll Runs', class: 'false' },
+  { path: 'payment-links', title: 'Payment Links', class: 'false' },
+  { path: 'kyc', title: 'KYC', class: 'false' },
 ];
 
 @Component({
@@ -42,9 +48,18 @@ export class SidebarComponent implements OnInit {
   user_name: string = 'John Doe'; // Example user name
   isCollapsed: boolean = false;
   isMobile: boolean = false;
+  user: any; // To store user data
+  isKycOnly: boolean = false;
 
   constructor(private store: Store, public router: Router) {
     this.checkScreenSize();
+
+    this.store.select(state => state.auth.user).subscribe(user => {
+      this.user = user;
+      if (user?.merchantId) {
+        this.isKycOnly = !user.merchantId.active || !user.merchantId.submitted;
+      }
+    });
   }
 
   ngOnInit(): void {
@@ -53,6 +68,10 @@ export class SidebarComponent implements OnInit {
   }
 
   private filterMenuItems(routes: RouteInfo[]): RouteInfo[] {
+    if (this.isKycOnly) {
+      // Only show KYC menu item if merchant is not active or not submitted
+      return routes.filter(item => item.path === 'kyc');
+    }
     let filteredItems = [...routes];
     const isAdmin =
       this.user_permissions.includes('Super Admin') ||
@@ -111,6 +130,12 @@ export class SidebarComponent implements OnInit {
       settlements: 'bi bi-cash',
       transfer: 'bi bi-currency-exchange',
       transaction: 'bi bi-filter',
+      kyc: 'bi bi-person-badge',
+      payroll: 'bi bi-file-earmark-text',
+      recipients: 'bi bi-person-lines-fill',
+      recurring: 'bi bi-calendar-event',
+      upcoming: 'bi bi-calendar-event',
+      'payment-links': 'bi bi-link-45deg',
       // 'dashboard': 'bi bi-bar-chart',
     };
 

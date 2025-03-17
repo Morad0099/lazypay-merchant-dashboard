@@ -35,6 +35,10 @@ export class AdminService {
     return this.http.post(`${API}/merchants/register`, data);
   }
 
+  updateMerchant(id: string, data: any): Observable<any> {
+    return this.http.put(`${API}/merchants/update`, { id, data });
+  }
+
   // otp():Promise<any>{
   //     return this.http.post(`${API}/transactions/reversal/otp`)
   //             .toPromise();

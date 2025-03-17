@@ -1,0 +1,73 @@
+<!-- kyc.component.html -->
+<div class="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg">
+    <!-- Tabs Navigation -->
+    <div class="flex border-b mb-6">
+        <button
+        *ngFor="let tab of tabs"
+        (click)="setActiveTab(tab)"
+        class="px-6 py-3 text-sm font-medium border-b-2 transition-all duration-300"
+        [ngClass]="{
+          'border-blue-600 text-blue-600 font-semibold': activeTab === tab,
+          'text-gray-500 hover:text-gray-700': activeTab !== tab
+        }"
+      >
+        {{ tab === 'business' ? 'Business Info' : tab === 'contact' ? 'Primary Contact' : 'Documents' }}
+      </button>
+      
+    </div>
+  
+    <!-- Form Section -->
+    <form [formGroup]="merchantForm" class="space-y-8">
+      <!-- Business Information Tab -->
+      <div *ngIf="activeTab === 'business'" formGroupName="businessInfo">
+        <h2 class="text-xl font-semibold text-gray-800">Business Information</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+          <div *ngFor="let field of businessFields">
+            <label class="block text-sm font-medium text-gray-700">{{ field.label }}</label>
+            <input type="text" [formControlName]="field.control"
+              class="w-full mt-1 p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
+        </div>
+      </div>
+  
+      <!-- Primary Contact Tab -->
+      <div *ngIf="activeTab === 'contact'" formGroupName="primaryContact">
+        <h2 class="text-xl font-semibold text-gray-800">Primary Contact</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+          <div *ngFor="let field of contactFields">
+            <label class="block text-sm font-medium text-gray-700">{{ field.label }}</label>
+            <input type="text" [formControlName]="field.control"
+              class="w-full mt-1 p-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
+        </div>
+      </div>
+  
+      <!-- Documents Tab -->
+      <div *ngIf="activeTab === 'documents'">
+        <h2 class="text-xl font-semibold text-gray-800">Upload Documents</h2>
+        <div class="flex items-center space-x-4 mt-4">
+          <button type="button" (click)="fileInput.click()"
+            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center space-x-2">
+            <span>Upload Document</span>
+          </button>
+          <input #fileInput type="file" (change)="onFileSelected($event)" class="hidden" accept="image/*,.pdf">
+        </div>
+  
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+          <div *ngFor="let doc of uploadedDocuments" class="border rounded-lg p-4 shadow">
+            <img [src]="doc.image" class="w-full h-40 object-cover mb-2 rounded-lg">
+            <p class="text-sm text-gray-600">{{ doc.type }}</p>
+          </div>
+        </div>
+      </div>
+    </form>
+  
+    <!-- Submit Button -->
+    <div class="mt-6">
+      <button (click)="updateProfile()" [disabled]="!isAllTabsFilled() || loading"
+        class="w-full py-3 bg-blue-600 text-white text-lg font-medium rounded-lg hover:bg-blue-700 transition disabled:opacity-50">
+        {{ loading ? 'Updating...' : 'Final Submit' }}
+      </button>
+    </div>
+  </div>
+  

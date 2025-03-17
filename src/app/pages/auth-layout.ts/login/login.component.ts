@@ -9,7 +9,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-login',
@@ -21,6 +21,7 @@ import { Router } from '@angular/router';
     ReactiveFormsModule,
     MatFormFieldModule,
     MatInputModule,
+    RouterModule
   ],
 })
 export class LoginComponent implements OnInit {
@@ -97,29 +98,55 @@ export class LoginComponent implements OnInit {
   confirmOtp() {
     const form = this.formGroup;
     if (!form.get('otp')?.valid) return;
-
+  
     const { email, password, otp } = form.value;
     this.loading = true;
-
+  
     this.service.login({ email, password, otp }).subscribe({
       next: (response) => {
-        this.store
-          .dispatch(
-            new AdminLogin({
-              user: response.data,
-              token: response.token,
-            })
-          )
-          .subscribe(() => {
-            this.router.navigate(['/payment-reconciliation']);
+        if (!response.success) {
+          this.showError(response.message || 'Login failed');
+          this.loading = false;
+          return;
+        }
+  
+        // Handle store dispatch with proper error catching
+        try {
+          const merchant = response.data?.merchantId;
+          this.store.dispatch(new AdminLogin({
+            user: response.data,
+            token: response.token,
+          })).subscribe({
+            next: () => {
+              this.loading = false;
+              
+              if (!merchant || !merchant.active || !merchant.submitted) {
+                setTimeout(() => {
+                  this.router.navigate(['/kyc']);
+                  console.log('Navigation success:');
+                }, 0);
+              } else {
+                this.router.navigate(['/payment-reconciliation']);
+              }
+            },
+            error: (err) => {
+              console.error('Store dispatch error:', err);
+              this.showError('Failed to save login state');
+              this.loading = false;
+            }
           });
+          
+        } catch (error) {
+          console.error('Login error:', error);
+          this.showError('An unexpected error occurred');
+          this.loading = false;
+        }
       },
       error: (err) => {
-        this.showError('Login failed: ' + err.message);
-      },
-      complete: () => {
+        console.error('Login request error:', err);
+        this.showError('Login failed: ' + (err.message || 'Unknown error'));
         this.loading = false;
-      },
+      }
     });
   }
 

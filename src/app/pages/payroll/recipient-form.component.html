@@ -1,0 +1,285 @@
+<!-- recipient-form.component.html -->
+<div class="p-6 bg-gray-50">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold text-gray-800">{{ isEditMode ? 'Edit Recipient' : 'Add New Recipient' }}</h1>
+    <button 
+      class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded-lg border border-gray-300 flex items-center transition-colors duration-200"
+      (click)="cancel()">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+      </svg>
+      Back to Recipients
+    </button>
+  </div>
+  
+  <div *ngIf="error" class="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded-r-lg">
+    <div class="flex">
+      <div class="flex-shrink-0">
+        <svg class="h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+        </svg>
+      </div>
+      <div class="ml-3">
+        <p class="text-sm text-red-700">{{ error }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
+    <div class="flex">
+      <div class="flex-shrink-0">
+        <svg class="animate-spin h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+      </div>
+      <div class="ml-3">
+        <p class="text-sm text-blue-700">Loading recipient data...</p>
+      </div>
+    </div>
+  </div>
+  
+  <div *ngIf="success" class="bg-green-50 border-l-4 border-green-500 p-4 mb-6 rounded-r-lg">
+    <div class="flex">
+      <div class="flex-shrink-0">
+        <svg class="h-5 w-5 text-green-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+        </svg>
+      </div>
+      <div class="ml-3">
+        <p class="text-sm text-green-700">{{ success }}</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="bg-white rounded-lg border border-gray-200 p-6">
+    <form [formGroup]="recipientForm" (ngSubmit)="onSubmit()">
+      <!-- Personal Information Section -->
+      <div class="mb-6">
+        <h2 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+          </svg>
+          Personal Information
+        </h2>
+        <div class="bg-gray-50 p-4 rounded-lg border border-gray-100">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label for="recipientName" class="block text-sm font-medium text-gray-700 mb-1">Recipient Name*</label>
+              <input 
+                type="text" 
+                id="recipientName" 
+                formControlName="recipientName" 
+                class="block w-full border border-gray-300 rounded-lg py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500" 
+                placeholder="Enter recipient name">
+              <div *ngIf="recipientForm.get('recipientName')?.touched && recipientForm.get('recipientName')?.hasError('required')" class="mt-1 text-sm text-red-600 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                </svg>
+                Recipient name is required
+              </div>
+            </div>
+            
+            <div>
+              <label for="department" class="block text-sm font-medium text-gray-700 mb-1">Department</label>
+              <input 
+                type="text" 
+                id="department" 
+                formControlName="department" 
+                class="block w-full border border-gray-300 rounded-lg py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500" 
+                placeholder="Enter department (optional)">
+            </div>
+            
+            <div>
+              <label for="position" class="block text-sm font-medium text-gray-700 mb-1">Position</label>
+              <input 
+                type="text" 
+                id="position" 
+                formControlName="position" 
+                class="block w-full border border-gray-300 rounded-lg py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500" 
+                placeholder="Enter position (optional)">
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Account Information Section -->
+      <div class="mb-6">
+        <h2 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
+            <path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd" />
+          </svg>
+          Account Information
+        </h2>
+        <div class="bg-gray-50 p-4 rounded-lg border border-gray-100">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label for="accountName" class="block text-sm font-medium text-gray-700 mb-1">Account Name*</label>
+              <input 
+                type="text" 
+                id="accountName" 
+                formControlName="accountName" 
+                class="block w-full border border-gray-300 rounded-lg py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500" 
+                placeholder="Enter account name">
+              <div *ngIf="recipientForm.get('accountName')?.touched && recipientForm.get('accountName')?.hasError('required')" class="mt-1 text-sm text-red-600 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                </svg>
+                Account name is required
+              </div>
+            </div>
+            
+            <div>
+              <label for="accountNumber" class="block text-sm font-medium text-gray-700 mb-1">Account Number*</label>
+              <input 
+                type="text" 
+                id="accountNumber" 
+                formControlName="accountNumber" 
+                class="block w-full border border-gray-300 rounded-lg py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500" 
+                placeholder="Enter account number">
+              <div *ngIf="recipientForm.get('accountNumber')?.touched && recipientForm.get('accountNumber')?.hasError('required')" class="mt-1 text-sm text-red-600 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                </svg>
+                Account number is required
+              </div>
+            </div>
+            
+            <div>
+              <label for="accountType" class="block text-sm font-medium text-gray-700 mb-1">Account Type*</label>
+              <div class="relative">
+                <select 
+                  id="accountType" 
+                  formControlName="accountType" 
+                  class="block appearance-none w-full border border-gray-300 rounded-lg py-2 px-3 pr-8 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                  <option *ngFor="let type of accountTypes" [value]="type">
+                    {{ type === 'bank' ? 'Bank Account' : 
+                       type === 'momo' ? 'Mobile Money' : 
+                     
+                       type === 'btc' ? 'Bitcoin' : 
+                       type === 'trc20' ? 'TRC20' : 
+                       type === 'erc20' ? 'ERC20' : 
+                       type === 'solana' ? 'Solana' : type }}
+                  </option>
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                  <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                    <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                  </svg>
+                </div>
+              </div>
+              <div *ngIf="recipientForm.get('accountType')?.touched && recipientForm.get('accountType')?.hasError('required')" class="mt-1 text-sm text-red-600 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                </svg>
+                Account type is required
+              </div>
+            </div>
+            
+            <div>
+              <label for="accountIssuer" class="block text-sm font-medium text-gray-700 mb-1">Bank / Provider*</label>
+              <input 
+                type="text" 
+                id="accountIssuer" 
+                formControlName="accountIssuer" 
+                list="bankOptions"
+                class="block w-full border border-gray-300 rounded-lg py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500" 
+                placeholder="Enter bank or provider name">
+              <datalist id="bankOptions">
+                <option *ngFor="let bank of bankOptions" [value]="bank"></option>
+              </datalist>
+              <div *ngIf="recipientForm.get('accountIssuer')?.touched && recipientForm.get('accountIssuer')?.hasError('required')" class="mt-1 text-sm text-red-600 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                </svg>
+                Bank / Provider is required
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Contact Information Section -->
+      <div class="mb-6">
+        <h2 class="text-lg font-medium text-gray-900 mb-4 flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+            <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+          </svg>
+          Contact Information
+        </h2>
+        <div class="bg-gray-50 p-4 rounded-lg border border-gray-100">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                    <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                  </svg>
+                </div>
+                <input 
+                  type="email" 
+                  id="email" 
+                  formControlName="email" 
+                  class="block w-full pl-10 border border-gray-300 rounded-lg py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500" 
+                  placeholder="Enter email (optional)">
+              </div>
+              <div *ngIf="recipientForm.get('email')?.touched && recipientForm.get('email')?.hasError('email')" class="mt-1 text-sm text-red-600 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                </svg>
+                Please enter a valid email address
+              </div>
+            </div>
+            
+            <div>
+              <label for="phoneNumber" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                  </svg>
+                </div>
+                <input 
+                  type="tel" 
+                  id="phoneNumber" 
+                  formControlName="phoneNumber" 
+                  class="block w-full pl-10 border border-gray-300 rounded-lg py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500" 
+                  placeholder="Enter phone number (optional)">
+              </div>
+              <div *ngIf="recipientForm.get('phoneNumber')?.touched && recipientForm.get('phoneNumber')?.hasError('pattern')" class="mt-1 text-sm text-red-600 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                </svg>
+                Please enter a valid phone number
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Form Actions -->
+      <div class="flex justify-end space-x-3 py-4 px-6 bg-gray-50 border border-gray-200 rounded-lg">
+        <button 
+          type="button" 
+          (click)="cancel()" 
+          class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200">
+          Cancel
+        </button>
+        
+        <button 
+          type="submit" 
+          [disabled]="submitting" 
+          class="inline-flex items-center px-4 py-2 border border-blue-500 text-sm font-medium rounded-lg text-white bg-blue-500 hover:bg-blue-600 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed">
+          <svg *ngIf="submitting" class="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          {{ isEditMode ? 'Update Recipient' : 'Add Recipient' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
