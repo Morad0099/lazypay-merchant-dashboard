@@ -23,6 +23,7 @@ import { CreateRecurringPayrollComponent } from './pages/payroll/create-recurrin
 import { RecurringPayrollDetailComponent } from './pages/payroll/recurring-payroll-detail.component';
 import { UpcomingPayrollRunsComponent } from './pages/payroll/upcoming-payroll-runs.component';
 import { PaymentLinkGeneratorComponent } from './pages/payment-link-generator/payment-link-generator.component';
+import { PaymentLinksPageComponent } from './pages/payment-links-page/payment-links-page.component';
 
 export const routes: Routes = [
   {
@@ -125,6 +126,10 @@ export const routes: Routes = [
       { 
         path: 'payment-links', 
         component: PaymentLinkGeneratorComponent 
+      },
+      {
+        path: 'payment-links-list',
+        component: PaymentLinksPageComponent,
       },
 
       {

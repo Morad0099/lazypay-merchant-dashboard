@@ -1,29 +1,30 @@
 <div class="flex" [class.sidebar-collapsed]="isCollapsed">
   <!-- Sidebar -->
   <aside
-    class="relative min-h-screen bg-white border-r border-gray-200 transition-all duration-300"
-    [class]="isCollapsed ? 'w-20' : 'w-64'"
+    class="relative bg-white border-r border-gray-200 transition-all duration-300 sidebar-container"
     [class]="isCollapsed ? 'w-20' : 'w-64'"
   >
-    <div class="pb-48">
-      <!-- Logo Section -->
-      <div
-        class="flex items-center justify-between p-4 border-b border-gray-200"
+    <!-- Logo Section - Fixed -->
+    <div
+      class="flex items-center justify-between p-4 border-b border-gray-200 sidebar-header"
+    >
+      <a class="flex items-center">
+        <img
+          src="../../../assets/images/doron.png"
+          alt="Logo"
+          class="h-8 w-auto"
+        />
+      </a>
+      <button
+        class="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600 transition-colors"
+        (click)="toggleSidebar()"
       >
-        <a class="flex items-center">
-          <img
-            src="../../../assets/images/doron.png"
-            alt="Logo"
-            class="h-8 w-auto"
-          />
-        </a>
-        <button
-          class="bg-red-500 text-white p-2 rounded-lg hover:bg-red-600 transition-colors"
-          (click)="toggleSidebar()"
-        >
-          <i class="ri-arrow-drop-right-line text-lg"></i>
-        </button>
-      </div>
+        <i class="ri-arrow-drop-right-line text-lg"></i>
+      </button>
+    </div>
+    
+    <!-- Scrollable Navigation Area -->
+    <div class="sidebar-scrollable">
       <!-- Navigation Menu -->
       <nav class="py-4">
         <ul class="space-y-2">
@@ -57,12 +58,11 @@
       <div *ngIf="isKycOnly" class="mt-4 p-3 text-center text-sm text-gray-600">
         Please complete your KYC to access all features
       </div>
-      
     </div>
 
-    <!-- Footer -->
+    <!-- Footer - Fixed -->
     <div
-      class="absolute bottom-0 w-full border-t border-gray-200 p-4 space-y-2"
+      class="absolute bottom-0 w-full border-t border-gray-200 p-4 space-y-2 sidebar-footer bg-white"
     >
       <button
         class="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
@@ -101,7 +101,7 @@
   </aside>
 
   <!-- Main Content -->
-  <main class="flex-1 bg-gray-50">
+  <main class="flex-1 bg-gray-50 main-content">
     <!-- Mobile Header -->
     <div
       class="lg:hidden flex items-center justify-between p-4 bg-white border-b border-gray-200"

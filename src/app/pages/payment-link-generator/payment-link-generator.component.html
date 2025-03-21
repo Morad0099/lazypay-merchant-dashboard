@@ -9,7 +9,7 @@
     <div class="flex flex-col md:flex-row gap-6">
       <!-- Form Section -->
       <div class="md:w-1/2">
-        <div class="bg-white rounded-lg shadow p-6">
+        <div class="bg-white rounded-lg border p-6">
           <h2 class="text-lg font-semibold mb-4">Payment Link Details</h2>
           <p *ngIf="merchantName" class="mb-4 text-gray-700">
             Generating links for: <span class="font-medium">{{ merchantName }}</span>
@@ -26,7 +26,7 @@
                 min="0.01" 
                 step="0.01"
                 placeholder="Enter amount"
-                class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                class="w-full rounded-md border-gray-300 border-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
               <p *ngIf="hasError('amount', 'required')" class="mt-1 text-sm text-red-600">Amount is required</p>
               <p *ngIf="hasError('amount', 'min')" class="mt-1 text-sm text-red-600">Amount must be greater than 0</p>
               <p *ngIf="hasError('amount', 'pattern')" class="mt-1 text-sm text-red-600">Amount can have at most 2 decimal places</p>
@@ -38,7 +38,7 @@
               <select 
                 id="currency"
                 formControlName="currency" 
-                class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                class="w-full rounded-md border-gray-300 border-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
                 <option *ngFor="let currency of currencies" [value]="currency">{{ currency }}</option>
               </select>
             </div>
@@ -51,7 +51,7 @@
                 formControlName="description" 
                 rows="3"
                 placeholder="Enter payment description"
-                class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"></textarea>
+                class="w-full rounded-md border-gray-300 border-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"></textarea>
               <p *ngIf="hasError('description', 'maxlength')" class="mt-1 text-sm text-red-600">
                 Description cannot exceed 200 characters
               </p>
@@ -65,7 +65,7 @@
                 id="accountName"
                 formControlName="accountName" 
                 placeholder="Enter account name"
-                class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                class="w-full rounded-md border-gray-300 border-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
               <p *ngIf="hasError('accountName', 'maxlength')" class="mt-1 text-sm text-red-600">
                 Account name cannot exceed 100 characters
               </p>
@@ -79,7 +79,7 @@
                 id="expiryDate"
                 formControlName="expiryDate" 
                 [min]="minDate"
-                class="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                class="w-full rounded-md border-gray-300 border-sm focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
               <p class="mt-1 text-xs text-gray-500">Leave blank for no expiry</p>
             </div>
   
@@ -105,7 +105,7 @@
   
       <!-- Result Section -->
       <div class="md:w-1/2">
-        <div class="bg-white rounded-lg shadow p-6 h-full flex flex-col">
+        <div class="bg-white rounded-lg border p-6 h-full flex flex-col">
           <h2 class="text-lg font-semibold mb-4">Generated Payment Link</h2>
           
           <!-- Error Message -->
