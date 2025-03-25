@@ -1,5 +1,5 @@
 <!-- kyc.component.html -->
-<div class="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg">
+<div class="max-w-4xl mx-auto p-6 bg-white border-lg rounded-lg">
     <!-- Tabs Navigation -->
     <div class="flex border-b mb-6">
         <button
@@ -54,7 +54,7 @@
         </div>
   
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-          <div *ngFor="let doc of uploadedDocuments" class="border rounded-lg p-4 shadow">
+          <div *ngFor="let doc of uploadedDocuments" class="border rounded-lg p-4 border">
             <img [src]="doc.image" class="w-full h-40 object-cover mb-2 rounded-lg">
             <p class="text-sm text-gray-600">{{ doc.type }}</p>
           </div>

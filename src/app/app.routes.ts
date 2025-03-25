@@ -24,6 +24,8 @@ import { RecurringPayrollDetailComponent } from './pages/payroll/recurring-payro
 import { UpcomingPayrollRunsComponent } from './pages/payroll/upcoming-payroll-runs.component';
 import { PaymentLinkGeneratorComponent } from './pages/payment-link-generator/payment-link-generator.component';
 import { PaymentLinksPageComponent } from './pages/payment-links-page/payment-links-page.component';
+import { DocumentationComponent } from './pages/documentation/documentation.component';
+import { HelpComponent } from './pages/help/help.component';
 
 export const routes: Routes = [
   {
@@ -139,6 +141,14 @@ export const routes: Routes = [
       {
         path: 'recipient/edit/:id',
         component: RecipientFormComponent
+      },
+      {
+        path: 'documentation',
+        component: DocumentationComponent,
+      },
+      {
+        path: 'help',
+        component: HelpComponent,
       },
       {
         path: 'recurring',

@@ -1,0 +1,1303 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+        color: #333;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 10px;
+      }
+
+      .date {
+        color: #666;
+        font-size: 0.9em;
+      }
+
+      h1,
+      h2,
+      h3 {
+        margin-top: 30px;
+        margin-bottom: 15px;
+      }
+
+      h1 {
+        font-size: 24px;
+        border-bottom: 2px solid #333;
+        padding-bottom: 10px;
+      }
+
+      h2 {
+        font-size: 20px;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 5px;
+      }
+
+      h3 {
+        font-size: 18px;
+      }
+
+      p {
+        margin-bottom: 15px;
+      }
+
+      .page-number {
+        text-align: right;
+        color: #666;
+        font-size: 0.8em;
+        margin: 30px 0 10px;
+      }
+
+      pre {
+        background-color: #f7f7f7;
+        padding: 15px;
+        border-radius: 5px;
+        overflow-x: auto;
+        margin: 20px 0;
+      }
+
+      code {
+        font-family: Consolas, Monaco, "Andale Mono", monospace;
+        color: #333;
+      }
+
+      .json-string {
+        color: #008000;
+      }
+
+      .json-number {
+        color: #0000ff;
+      }
+
+      .json-boolean {
+        color: #b22222;
+      }
+
+      .json-null {
+        color: #808080;
+      }
+
+      .json-key {
+        color: #a52a2a;
+      }
+
+      ul,
+      ol {
+        margin-bottom: 20px;
+        padding-left: 20px;
+      }
+
+      li {
+        margin-bottom: 5px;
+      }
+
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 20px 0;
+      }
+
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 8px 12px;
+        text-align: left;
+      }
+
+      th {
+        background-color: #f2f2f2;
+        font-weight: bold;
+      }
+
+      tr:nth-child(even) {
+        background-color: #f9f9f9;
+      }
+
+      .endpoint {
+        background-color: #f5f5f5;
+        padding: 10px;
+        border-left: 3px solid #007bff;
+        margin: 15px 0;
+      }
+
+      .method {
+        font-weight: bold;
+        color: #007bff;
+      }
+
+      .url {
+        color: #28a745;
+        word-break: break-all;
+      }
+
+      .section-divider {
+        border-top: 1px solid #ddd;
+        margin: 40px 0 20px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="header">
+      <h1>LazyPay API Specification Documentation</h1>
+      <div class="date">2025-01-23</div>
+    </div>
+
+    <h2>Overview</h2>
+    <p>
+      LazyPay is a mobile payment gateway that enables digital payments and
+      collection services across Ghana. The platform supports transactions from
+      all major mobile money providers and bank accounts through payment cards.
+    </p>
+
+    <h2>Authentication</h2>
+    <p>
+      All API requests require authentication using an API key and merchant ID.
+      These credentials must be included in the request headers.
+    </p>
+
+    <h3>Obtaining Credentials</h3>
+    <ol>
+      <li>Create a LazyPay merchant account.</li>
+      <li>Generate your unique API key and merchant ID from the dashboard.</li>
+      <li>Store these credentials securely.</li>
+    </ol>
+
+    <h2>Supported Payment Providers</h2>
+    <ul>
+      <li>MTN</li>
+      <li>Vodafone</li>
+      <li>AirtelTigo</li>
+    </ul>
+
+    <div class="section-divider"></div>
+
+    <h2>USSD Configuration</h2>
+
+    <h3>Overview</h3>
+    <p>
+      LazyPay enables merchants to configure their own USSD shortcodes directly
+      through the merchant dashboard. This feature allows customers to make
+      payments using custom USSD codes without requiring any technical
+      integration.
+    </p>
+
+    <h3>Setting Up USSD Payments</h3>
+    <ol>
+      <li>
+        <strong>Access Wallet Settings</strong>
+        <ul>
+          <li>Navigate to your merchant dashboard</li>
+          <li>Access the Hub section</li>
+          <li>Click "Update Wallet Details Icon"</li>
+        </ul>
+      </li>
+      <li>
+        <strong>Configure USSD Settings</strong>
+        <ul>
+          <li>Enter your USSD shortcode (e.g., *123#)</li>
+          <li>Provide a callback URL for USSD payment notifications</li>
+          <li>Enable USSD Payments using the checkbox</li>
+          <li>Save your configuration by clicking "Update Settings"</li>
+        </ul>
+      </li>
+    </ol>
+
+    <h3>Key Features</h3>
+    <ul>
+      <li>Direct integration with existing USSD systems</li>
+      <li>Real-time transaction processing</li>
+      <li>Support for all major mobile money providers</li>
+      <li>Automated payment reconciliation</li>
+      <li>No technical integration required</li>
+    </ul>
+
+    <div class="section-divider"></div>
+
+    <h2>API Endpoints</h2>
+
+    <h3>1. Authentication Token</h3>
+    <p>Generate an authentication token for subsequent API calls.</p>
+
+    <div class="endpoint">
+      <div><span class="method">Method:</span> POST</div>
+      <div>
+        <span class="method">URL:</span>
+        <span class="url">https://doronpay.com/api/hub/token</span>
+      </div>
+    </div>
+
+    <h4>Headers:</h4>
+    <table>
+      <thead>
+        <tr>
+          <th>Params</th>
+          <th>Value Type</th>
+          <th>Required</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Content-Type</td>
+          <td>Application/json</td>
+          <td>YES</td>
+          <td>This is needed to encode all requests and responses as JSON</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h4>Request Payload:</h4>
+    <table>
+      <thead>
+        <tr>
+          <th>Params</th>
+          <th>Value Type</th>
+          <th>Required</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>apikey</td>
+          <td>string</td>
+          <td>YES</td>
+          <td>Unique key generated for merchant</td>
+        </tr>
+        <tr>
+          <td>merchantId</td>
+          <td>string</td>
+          <td>YES</td>
+          <td>Unique ID generated for merchant</td>
+        </tr>
+        <tr>
+          <td>operation</td>
+          <td>string</td>
+          <td>YES</td>
+          <td>Type of operation being performed</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h4>Sample Payload:</h4>
+    <pre><code>
+  <span class="json-key">"apikey"</span>: <span class="json-string">"390925-495q-40"</span>,
+  <span class="json-key">"merchantId"</span>: <span class="json-string">"4y5e76687957iiytj6"</span>,
+  <span class="json-key">"operation"</span>: <span class="json-string">"DEBIT"</span>
+</code></pre>
+
+    <h4>Sample Response:</h4>
+    <pre><code>
+  <span class="json-key">"success"</span>: <span class="json-boolean">true</span>,
+  <span class="json-key">"message"</span>: <span class="json-string">"Token generated successfully"</span>,
+  <span class="json-key">"data"</span>: <span class="json-string">"argerghstOIOGIRNIONO283985898w9fndsksplgkslmfpstg400KByUBt"</span>
+</code></pre>
+
+    <h3>2. Credit Transaction</h3>
+    <p>
+      Transfer money to a specific account, either mobile money or bank account.
+    </p>
+
+    <div class="endpoint">
+      <div><span class="method">Method:</span> POST</div>
+      <div>
+        <span class="method">URL:</span>
+        <span class="url">https://doronpay.com/api/hub/credit</span>
+      </div>
+    </div>
+
+    <h4>Request Payload:</h4>
+    <table>
+      <thead>
+        <tr>
+          <th>Params</th>
+          <th>Value Type</th>
+          <th>Required</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>externalTransactionId</td>
+          <td>String</td>
+          <td>YES</td>
+          <td>Unique transaction identifier</td>
+        </tr>
+        <tr>
+          <td>account_name</td>
+          <td>String</td>
+          <td>YES</td>
+          <td>Recipient's account name</td>
+        </tr>
+        <tr>
+          <td>amount</td>
+          <td>String</td>
+          <td>YES</td>
+          <td>Transaction amount</td>
+        </tr>
+        <tr>
+          <td>account_number</td>
+          <td>String</td>
+          <td>YES</td>
+          <td>Recipient's account number</td>
+        </tr>
+        <tr>
+          <td>account_issuer</td>
+          <td>String</td>
+          <td>YES</td>
+          <td>Network provider of recipient mobile number</td>
+        </tr>
+        <tr>
+          <td>description</td>
+          <td>String</td>
+          <td>YES</td>
+          <td>Transaction description</td>
+        </tr>
+        <tr>
+          <td>callbackUrl</td>
+          <td>String</td>
+          <td>YES</td>
+          <td>Webhook URL for transaction status updates</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h4>Sample Payload:</h4>
+    <pre><code>
+  <span class="json-key">"externalTransactionId"</span>: <span class="json-string">"123434675"</span>,
+  <span class="json-key">"account_name"</span>: <span class="json-string">"John Doe"</span>,
+  <span class="json-key">"amount"</span>: <span class="json-string">"0.1"</span>,
+  <span class="json-key">"account_number"</span>: <span class="json-string">"0207573792"</span>,
+  <span class="json-key">"account_issuer"</span>: <span class="json-string">"vodafone"</span>,
+  <span class="json-key">"description"</span>: <span class="json-string">"lazypay test"</span>,
+  <span class="json-key">"callbackUrl"</span>: <span class="json-string">"https://webhook.site/36b4ec20-8ead-4b30-8b01-98c91697c5ed"</span>
+</code></pre>
+
+    <h4>Sample Response:</h4>
+    <pre><code>
+  <span class="json-key">"code"</span>: <span class="json-string">"01"</span>,
+  <span class="json-key">"success"</span>: <span class="json-boolean">true</span>,
+  <span class="json-key">"message"</span>: <span class="json-string">"Transaction received for processing"</span>,
+  <span class="json-key">"externalTransactionId"</span>: <span class="json-string">"123434675"</span>,
+  <span class="json-key">"transactionId"</span>: <span class="json-string">"8618063568197732"</span>,
+  <span class="json-key">"date"</span>: <span class="json-string">"2023-02-13T11:18:21.042Z"</span>
+</code></pre>
+
+    <h3>3. Debit Transaction</h3>
+    <p>Request funds from a mobile money account.</p>
+
+    <div class="endpoint">
+      <div><span class="method">Method:</span> POST</div>
+      <div>
+        <span class="method">URL:</span>
+        <span class="url">https://doronpay.com/api/hub/debit</span>
+      </div>
+    </div>
+
+    <h4>Request Payload:</h4>
+    <table>
+      <thead>
+        <tr>
+          <th>Params</th>
+          <th>Value Type</th>
+          <th>Required</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>externalTransactionId</td>
+          <td>String</td>
+          <td>YES</td>
+          <td>Unique transaction identifier</td>
+        </tr>
+        <tr>
+          <td>account_name</td>
+          <td>String</td>
+          <td>YES</td>
+          <td>Account holder's name</td>
+        </tr>
+        <tr>
+          <td>amount</td>
+          <td>String</td>
+          <td>YES</td>
+          <td>Transaction amount</td>
+        </tr>
+        <tr>
+          <td>account_number</td>
+          <td>String</td>
+          <td>YES</td>
+          <td>Recipient mobile number</td>
+        </tr>
+        <tr>
+          <td>account_issuer</td>
+          <td>String</td>
+          <td>YES</td>
+          <td>Network provider of recipient mobile number</td>
+        </tr>
+        <tr>
+          <td>description</td>
+          <td>String</td>
+          <td>YES</td>
+          <td>Brief description of the transaction</td>
+        </tr>
+        <tr>
+          <td>callbackUrl</td>
+          <td>String</td>
+          <td>YES</td>
+          <td>Webhook URL for transaction status updates</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h4>Sample Payload:</h4>
+    <pre><code>
+  <span class="json-key">"externalTransactionId"</span>: <span class="json-string">"123434675"</span>,
+  <span class="json-key">"account_name"</span>: <span class="json-string">"John Doe"</span>,
+  <span class="json-key">"amount"</span>: <span class="json-string">"1"</span>,
+  <span class="json-key">"account_number"</span>: <span class="json-string">"0207573792"</span>,
+  <span class="json-key">"account_issuer"</span>: <span class="json-string">"vodafone"</span>,
+  <span class="json-key">"description"</span>: <span class="json-string">"lazypay test"</span>,
+  <span class="json-key">"callbackUrl"</span>: <span class="json-string">"https://webhook.site/36b4ec20-8ead-4b30-8b01-98c91697c5ed"</span>
+</code></pre>
+
+    <h4>Sample Response:</h4>
+    <pre><code>
+  <span class="json-key">"code"</span>: <span class="json-string">"01"</span>,
+  <span class="json-key">"success"</span>: <span class="json-boolean">true</span>,
+  <span class="json-key">"message"</span>: <span class="json-string">"Transaction received for processing"</span>,
+  <span class="json-key">"externalTransactionId"</span>: <span class="json-string">"123434675"</span>,
+  <span class="json-key">"transactionId"</span>: <span class="json-string">"8618063568197732"</span>,
+  <span class="json-key">"date"</span>: <span class="json-string">"2023-02-13T11:18:21.042Z"</span>
+</code></pre>
+
+    <h3>4. Card Payment</h3>
+    <p>Process card payments.</p>
+
+    <div class="endpoint">
+      <div><span class="method">Method:</span> POST</div>
+      <div>
+        <span class="method">URL:</span>
+        <span class="url">https://doronpay.com/api/hub/card</span>
+      </div>
+    </div>
+
+    <h4>Request Payload:</h4>
+    <table>
+      <thead>
+        <tr>
+          <th>Params</th>
+          <th>Value Type</th>
+          <th>Required</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>amount</td>
+          <td>string</td>
+          <td>YES</td>
+          <td>Amount to be paid</td>
+        </tr>
+        <tr>
+          <td>account_name</td>
+          <td>string</td>
+          <td>YES</td>
+          <td>Account holder's name</td>
+        </tr>
+        <tr>
+          <td>card</td>
+          <td>object</td>
+          <td>YES</td>
+          <td>Card details object</td>
+        </tr>
+        <tr>
+          <td>description</td>
+          <td>string</td>
+          <td>YES</td>
+          <td>Brief description of the transaction</td>
+        </tr>
+        <tr>
+          <td>callbackUrl</td>
+          <td>String</td>
+          <td>YES</td>
+          <td>Webhook URL for transaction status</td>
+        </tr>
+        <tr>
+          <td>clientRedirectUrl</td>
+          <td>String</td>
+          <td>YES</td>
+          <td>Client URL to redirect to</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h4>Card Object:</h4>
+    <table>
+      <thead>
+        <tr>
+          <th>Params</th>
+          <th>Value Type</th>
+          <th>Required</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>cvc</td>
+          <td>string</td>
+          <td>YES</td>
+          <td>Secret code for the card</td>
+        </tr>
+        <tr>
+          <td>expiry</td>
+          <td>string</td>
+          <td>YES</td>
+          <td>Expiry date for the card</td>
+        </tr>
+        <tr>
+          <td>number</td>
+          <td>string</td>
+          <td>YES</td>
+          <td>Card number</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h4>Sample Payload:</h4>
+    <pre><code>
+  <span class="json-key">"externalTransactionId"</span>: <span class="json-string">"00100234"</span>,
+  <span class="json-key">"account_name"</span>: <span class="json-string">"Kweku Frimpong"</span>,
+  <span class="json-key">"amount"</span>: <span class="json-string">"1"</span>,
+  <span class="json-key">"description"</span>: <span class="json-string">"card test"</span>,
+  <span class="json-key">"card"</span>: 
+    <span class="json-key">"cvc"</span>: <span class="json-string">"123"</span>,
+    <span class="json-key">"expiry"</span>: <span class="json-string">"09/23"</span>,
+    <span class="json-key">"number"</span>: <span class="json-string">"12345678910"</span>
+  ,
+  <span class="json-key">"callbackUrl"</span>: <span class="json-string">"https://webhook.site/7fcce040-8d4f-4e79-bde6-31abcd3ff897"</span>,
+  <span class="json-key">"clientRedirectUrl"</span>: <span class="json-string">"https://lazylogiclimited.com"</span>
+</code></pre>
+
+    <h4>Sample Response:</h4>
+    <pre><code>
+  <span class="json-key">"code"</span>: <span class="json-string">"00"</span>,
+  <span class="json-key">"success"</span>: <span class="json-boolean">true</span>,
+  <span class="json-key">"message"</span>: <span class="json-string">"success"</span>,
+  <span class="json-key">"status"</span>: <span class="json-string">"stats"</span>,
+  <span class="json-key">"redirectUrl"</span>: <span class="json-string">"redirectUrl"</span>,
+  <span class="json-key">"transactionId"</span>: <span class="json-string">"8618063568197732"</span>,
+  <span class="json-key">"date"</span>: <span class="json-string">"2023-02-13T11:18:21.042Z"</span>
+</code></pre>
+
+    <h3>5. Get Transaction Status</h3>
+    <p>Retrieve the status of a transaction using its unique external ID.</p>
+
+    <div class="endpoint">
+      <div><span class="method">Method:</span> GET</div>
+      <div>
+        <span class="method">URL:</span>
+        <span class="url"
+          >https://doronpay.com/api/hub/status/externalTransactionId</span
+        >
+      </div>
+    </div>
+
+    <h4>Sample URL Request:</h4>
+    <pre><code>https://doronpay.com/api/hub/status/123243535345</code></pre>
+
+    <h4>Sample Response:</h4>
+    <pre><code>
+  <span class="json-key">"success"</span>: <span class="json-boolean">false</span>,
+  <span class="json-key">"code"</span>: <span class="json-string">"02"</span>,
+  <span class="json-key">"status"</span>: <span class="json-string">"FAILED"</span>,
+  <span class="json-key">"message"</span>: <span class="json-string">"Transaction not found"</span>,
+  <span class="json-key">"transactionId"</span>: <span class="json-string">"123243535345"</span>
+    </code></pre>
+
+    <h3>6. Account Name Verification</h3>
+    <p>
+      Get the verified registered name on the recipient account number. Specify
+      the account type field can be either "momo" or "bank". By default, the
+      account type is "momo".
+    </p>
+
+    <p>
+      Performing bank transaction request, account_issuers should be passed as
+      the bank code and not the bank name. For example, ABSA BANK GHANA LIMITED
+      has code "300303".
+    </p>
+
+    <p>
+      NOTICE: account_issuer should be a string of integer (passed as a code)
+      when performing bank transaction request. Each bank has a special code
+      that are used instead of their name. This code is then passed as a string
+      in order to perform request. For example, ABSA BANK GHANA LIMITED's code
+      is 300303 and should be passed as "300303".
+    </p>
+
+    <div class="endpoint">
+      <div><span class="method">Method:</span> POST</div>
+      <div>
+        <span class="method">URL:</span>
+        <span class="url">https://doronpay.com/api/hub/enquiry</span>
+      </div>
+    </div>
+
+    <h4>Request Payload:</h4>
+    <table>
+      <thead>
+        <tr>
+          <th>Params</th>
+          <th>Value Type</th>
+          <th>Required</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>account_number</td>
+          <td>string</td>
+          <td>YES</td>
+          <td>Mobile number to check the name</td>
+        </tr>
+        <tr>
+          <td>account_issuer</td>
+          <td>string</td>
+          <td>YES</td>
+          <td>Network provider of sender mobile number</td>
+        </tr>
+        <tr>
+          <td>account_type</td>
+          <td>string</td>
+          <td>NO</td>
+          <td>"Bank" or "Momo" (default: "Momo")</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h4>Sample Payload:</h4>
+    <pre><code>
+  <span class="json-key">"account_number"</span>: <span class="json-string">"0506259044"</span>,
+  <span class="json-key">"account_issuer"</span>: <span class="json-string">"vodafone"</span>
+</code></pre>
+
+    <h4>Sample Response:</h4>
+    <pre><code>
+  <span class="json-key">"success"</span>: <span class="json-boolean">true</span>,
+  <span class="json-key">"code"</span>: <span class="json-string">"00"</span>,
+  <span class="json-key">"message"</span>: <span class="json-string">"success"</span>,
+  <span class="json-key">"data"</span>: <span class="json-string">"Dany Christopher PERRIERE"</span>
+</code></pre>
+
+    <h3>7. Bank Transaction</h3>
+    <p>
+      Process transactions with bank accounts. When performing bank
+      transactions, use the bank's code as the account_issuer instead of the
+      bank name.
+    </p>
+
+    <div class="endpoint">
+      <div><span class="method">Method:</span> POST</div>
+      <div>
+        <span class="method">URL:</span>
+        <span class="url">https://doronpay.com/api/hub/credit</span> (for
+        credit)
+      </div>
+    </div>
+
+    <h4>Request Payload:</h4>
+    <table>
+      <thead>
+        <tr>
+          <th>Params</th>
+          <th>Value Type</th>
+          <th>Required</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>externalTransactionId</td>
+          <td>String</td>
+          <td>YES</td>
+          <td>Unique transaction identifier</td>
+        </tr>
+        <tr>
+          <td>account_name</td>
+          <td>String</td>
+          <td>YES</td>
+          <td>Account holder's name</td>
+        </tr>
+        <tr>
+          <td>amount</td>
+          <td>String</td>
+          <td>YES</td>
+          <td>Transaction amount</td>
+        </tr>
+        <tr>
+          <td>account_number</td>
+          <td>String</td>
+          <td>YES</td>
+          <td>Bank account number</td>
+        </tr>
+        <tr>
+          <td>account_issuer</td>
+          <td>String</td>
+          <td>YES</td>
+          <td>Bank code (e.g., "300303" for ABSA Bank)</td>
+        </tr>
+        <tr>
+          <td>account_type</td>
+          <td>String</td>
+          <td>YES</td>
+          <td>Must be set to "bank"</td>
+        </tr>
+        <tr>
+          <td>serviceType</td>
+          <td>String</td>
+          <td>NO</td>
+          <td>Transfer type: "NRT" or "GIP" (default: "GIP")</td>
+        </tr>
+        <tr>
+          <td>description</td>
+          <td>String</td>
+          <td>YES</td>
+          <td>Brief description of the transaction</td>
+        </tr>
+        <tr>
+          <td>callbackUrl</td>
+          <td>String</td>
+          <td>YES</td>
+          <td>Webhook URL for transaction status updates</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h4>Sample Payload:</h4>
+    <pre><code>
+  <span class="json-key">"externalTransactionId"</span>: <span class="json-string">"123434675"</span>,
+  <span class="json-key">"account_name"</span>: <span class="json-string">"MARK OSEI TUTU"</span>,
+  <span class="json-key">"amount"</span>: <span class="json-string">"5"</span>,
+  <span class="json-key">"account_number"</span>: <span class="json-string">"0413541220"</span>,
+  <span class="json-key">"account_issuer"</span>: <span class="json-string">"300303"</span>,
+  <span class="json-key">"account_type"</span>: <span class="json-string">"bank"</span>,
+  <span class="json-key">"serviceType"</span>: <span class="json-string">"GIP"</span>,
+  <span class="json-key">"description"</span>: <span class="json-string">"lazypay test"</span>,
+  <span class="json-key">"callbackUrl"</span>: <span class="json-string">"https://webhook.site/36b4ec20-8ead-4b30-8b01-98c91697c5ed"</span>
+</code></pre>
+
+    <h4>Sample Response:</h4>
+    <pre><code>
+<span class="json-key">"success"</span>: <span class="json-boolean">true</span>,
+  <span class="json-key">"code"</span>: <span class="json-string">"01"</span>,
+  <span class="json-key">"message"</span>: <span class="json-string">"Transaction queued for processing"</span>,
+  <span class="json-key">"transactionId"</span>: <span class="json-string">"7598218378153776"</span>,
+  <span class="json-key">"date"</span>: <span class="json-string">"2025-01-23T17:35:47.738Z"</span>,
+  <span class="json-key">"externalTransactionId"</span>: <span class="json-string">"123434675"</span>
+</code></pre>
+
+    <h3>8. Get Bank List</h3>
+
+    <div class="endpoint">
+      <div><span class="method">Method:</span> GET</div>
+      <div>
+        <span class="method">URL:</span>
+        <span class="url">https://doronpay.com/api/hub/banks/get</span>
+      </div>
+    </div>
+
+    <h4>Sample Response:</h4>
+    <pre><code>
+  <span class="json-key">"success"</span>: <span class="json-boolean">true</span>,
+  <span class="json-key">"message"</span>: <span class="json-string">"success"</span>,
+  <span class="json-key">"data"</span>: [
+    
+      <span class="json-key">"BankCode"</span>: <span class="json-string">"300302"</span>,
+      <span class="json-key">"BankName"</span>: <span class="json-string">"STANDARD CHARTERED BANK (GH) LTD"</span>,
+      <span class="json-key">"NrtActive"</span>: <span class="json-string">"True"</span>,
+      <span class="json-key">"IsActive"</span>: <span class="json-string">"True"</span>
+    ,
+    
+      <span class="json-key">"BankCode"</span>: <span class="json-string">"300303"</span>,
+      <span class="json-key">"BankName"</span>: <span class="json-string">"ABSA BANK (GH) LTD."</span>,
+      <span class="json-key">"NrtActive"</span>: <span class="json-string">"True"</span>,
+      <span class="json-key">"IsActive"</span>: <span class="json-string">"True"</span>
+    
+    // ... other banks
+  ]
+</code></pre>
+
+    <h3>Supported Banks and Codes</h3>
+    <p>
+      Here are the supported banks and their corresponding codes for
+      transactions:
+    </p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Bank Code</th>
+          <th>Bank Name</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>300302</td>
+          <td>STANDARD CHARTERED BANK (GH) LTD</td>
+        </tr>
+        <tr>
+          <td>300303</td>
+          <td>ABSA BANK (GH) LTD.</td>
+        </tr>
+        <tr>
+          <td>300304</td>
+          <td>GCB BANK</td>
+        </tr>
+        <tr>
+          <td>300305</td>
+          <td>NATIONAL INVESTMENT BANK LTD</td>
+        </tr>
+        <tr>
+          <td>300325</td>
+          <td>UNITED BANK FOR AFRICA (GH) LTD</td>
+        </tr>
+        <tr>
+          <td>300306</td>
+          <td>ARP APEX BANK LTD</td>
+        </tr>
+        <tr>
+          <td>300308</td>
+          <td>SG GHANA LTD</td>
+        </tr>
+        <tr>
+          <td>300309</td>
+          <td>UNIVERSAL MERCHANT BANK</td>
+        </tr>
+        <tr>
+          <td>300310</td>
+          <td>REPUBLIC BANK</td>
+        </tr>
+        <tr>
+          <td>300311</td>
+          <td>ZENITH BANK (GH) LTD</td>
+        </tr>
+        <tr>
+          <td>300312</td>
+          <td>ECOBANK (GH) LTD</td>
+        </tr>
+        <tr>
+          <td>300313</td>
+          <td>CAL BANK LTD</td>
+        </tr>
+        <tr>
+          <td>300316</td>
+          <td>FIRST ATLANTIC MERCHANT BANK LTD</td>
+        </tr>
+        <tr>
+          <td>300317</td>
+          <td>PRUDENTIAL BANK LTD</td>
+        </tr>
+        <tr>
+          <td>300318</td>
+          <td>STANBIC BANK GHANA LTD</td>
+        </tr>
+        <tr>
+          <td>300320</td>
+          <td>BANK OF AFRICA LTD</td>
+        </tr>
+        <tr>
+          <td>300323</td>
+          <td>FIDELITY BANK GHANA LTD</td>
+        </tr>
+        <tr>
+          <td>300322</td>
+          <td>GUARANTY TRUST BANK</td>
+        </tr>
+        <tr>
+          <td>300324</td>
+          <td>OmniBSIC GHANA</td>
+        </tr>
+        <tr>
+          <td>300329</td>
+          <td>ACCESS BANK (GH) LTD</td>
+        </tr>
+        <tr>
+          <td>300334</td>
+          <td>FIRST NATIONAL BANK</td>
+        </tr>
+        <tr>
+          <td>300331</td>
+          <td>CONSOLIDATED BANK GHANA</td>
+        </tr>
+        <tr>
+          <td>300307</td>
+          <td>AGRICULTURAL DEVELOPMENT BANK</td>
+        </tr>
+        <tr>
+          <td>300319</td>
+          <td>FBN BANK LTD</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h4>Important Notes:</h4>
+    <ol>
+      <li>
+        Always use the bank code (not bank name) as the account_issuer when
+        making bank transactions
+      </li>
+      <li>Set account_type to "bank" for all bank transactions</li>
+      <li>Bank codes must be passed as strings (e.g., "300303" not 300303)</li>
+      <li>The serviceType parameter accepts either "NRT" or "GIP" values</li>
+      <li>If serviceType is not specified, it defaults to "GIP"</li>
+      <li>Verify bank account details before processing transactions</li>
+    </ol>
+
+    <h3>9. Credit Transaction (USDT)</h3>
+    <p>Transfer USDT to a specified account.</p>
+
+    <div class="endpoint">
+      <div><span class="method">Method:</span> POST</div>
+      <div>
+        <span class="method">URL:</span>
+        <span class="url">https://doronpay.com/api/hub/credit</span>
+      </div>
+    </div>
+
+    <h4>Request Payload:</h4>
+    <table>
+      <thead>
+        <tr>
+          <th>Params</th>
+          <th>Value Type</th>
+          <th>Required</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>externalTransactionId</td>
+          <td>String</td>
+          <td>YES</td>
+          <td>Unique transaction identifier</td>
+        </tr>
+        <tr>
+          <td>account_name</td>
+          <td>String</td>
+          <td>YES</td>
+          <td>Recipient's account name</td>
+        </tr>
+        <tr>
+          <td>amount</td>
+          <td>String</td>
+          <td>YES</td>
+          <td>Transaction amount</td>
+        </tr>
+        <tr>
+          <td>account_number</td>
+          <td>String</td>
+          <td>YES</td>
+          <td>Recipient's USDT wallet address</td>
+        </tr>
+        <tr>
+          <td>account_type</td>
+          <td>String</td>
+          <td>YES</td>
+          <td>Type of account ("usdt")</td>
+        </tr>
+        <tr>
+          <td>description</td>
+          <td>String</td>
+          <td>YES</td>
+          <td>Transaction description</td>
+        </tr>
+        <tr>
+          <td>callbackUrl</td>
+          <td>String</td>
+          <td>YES</td>
+          <td>Webhook URL for transaction status updates</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h4>Sample Payload:</h4>
+    <pre><code>
+  <span class="json-key">"externalTransactionId"</span>: <span class="json-string">"1121"</span>,
+  <span class="json-key">"account_name"</span>: <span class="json-string">"John Doe"</span>,
+  <span class="json-key">"amount"</span>: <span class="json-string">"0.5"</span>,
+  <span class="json-key">"account_number"</span>: <span class="json-string">"TAdt5etY92vZFQwkv7DYt7HtvJFEjJ"</span>,
+  <span class="json-key">"account_type"</span>: <span class="json-string">"usdt"</span>,
+  <span class="json-key">"description"</span>: <span class="json-string">"USDT to my Binance test 2"</span>,
+  <span class="json-key">"callbackUrl"</span>: <span class="json-string">"https://webhook.site/426d06e1-9fd2-4ce6-9326-1a6be60bdb20"</span>
+</code></pre>
+
+    <h3>10. Debit Transaction (USDT)</h3>
+    <p>Request funds in USDT from a specific account.</p>
+
+    <div class="endpoint">
+      <div><span class="method">Method:</span> POST</div>
+      <div>
+        <span class="method">URL:</span>
+        <span class="url">https://doronpay.com/api/hub/debit</span>
+      </div>
+    </div>
+
+    <h4>Request Payload:</h4>
+    <table>
+      <thead>
+        <tr>
+          <th>Params</th>
+          <th>Value Type</th>
+          <th>Required</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>externalTransactionId</td>
+          <td>String</td>
+          <td>YES</td>
+          <td>Unique transaction identifier</td>
+        </tr>
+        <tr>
+          <td>account_name</td>
+          <td>String</td>
+          <td>YES</td>
+          <td>Account holder's name</td>
+        </tr>
+        <tr>
+          <td>account_type</td>
+          <td>String</td>
+          <td>YES</td>
+          <td>Type of account ("usdt")</td>
+        </tr>
+        <tr>
+          <td>account_number</td>
+          <td>String</td>
+          <td>YES</td>
+          <td>Recipient's USDT wallet address</td>
+        </tr>
+        <tr>
+          <td>amount</td>
+          <td>String</td>
+          <td>YES</td>
+          <td>Transaction amount</td>
+        </tr>
+        <tr>
+          <td>description</td>
+          <td>String</td>
+          <td>YES</td>
+          <td>Brief description of the transaction</td>
+        </tr>
+        <tr>
+          <td>callbackUrl</td>
+          <td>String</td>
+          <td>YES</td>
+          <td>Webhook URL for transaction status updates</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h4>Sample Payload:</h4>
+    <pre><code>
+  <span class="json-key">"externalTransactionId"</span>: <span class="json-string">"111"</span>,
+  <span class="json-key">"account_name"</span>: <span class="json-string">"John Doe"</span>,
+  <span class="json-key">"account_type"</span>: <span class="json-string">"usdt"</span>,
+  <span class="json-key">"account_number"</span>: <span class="json-string">"TAdt5etY92vZFQwkv7DYt7HtvJFEjJ"</span>,
+  <span class="json-key">"amount"</span>: <span class="json-string">"1"</span>,
+  <span class="json-key">"description"</span>: <span class="json-string">"Transaction payment"</span>,
+  <span class="json-key">"callbackUrl"</span>: <span class="json-string">"https://webhook.site/426d06e1-9fd2-4ce6-9326-1a6be60bdb20"</span>
+</code></pre>
+
+    <h3>11. Credit Transaction (BTC)</h3>
+    <p>Transfer BTC to a specified account.</p>
+
+    <div class="endpoint">
+      <div><span class="method">Method:</span> POST</div>
+      <div>
+        <span class="method">URL:</span>
+        <span class="url">https://doronpay.com/api/hub/credit</span>
+      </div>
+    </div>
+
+    <h4>Request Payload:</h4>
+    <table>
+      <thead>
+        <tr>
+          <th>Params</th>
+          <th>Value Type</th>
+          <th>Required</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>externalTransactionId</td>
+          <td>String</td>
+          <td>YES</td>
+          <td>Unique transaction identifier</td>
+        </tr>
+        <tr>
+          <td>account_name</td>
+          <td>String</td>
+          <td>YES</td>
+          <td>Recipient's account name</td>
+        </tr>
+        <tr>
+          <td>amount</td>
+          <td>String</td>
+          <td>YES</td>
+          <td>Transaction amount</td>
+        </tr>
+        <tr>
+          <td>account_number</td>
+          <td>String</td>
+          <td>YES</td>
+          <td>RECIPIENT'S BTC wallet address</td>
+        </tr>
+        <tr>
+          <td>account_type</td>
+          <td>STRING</td>
+          <td>YES</td>
+          <td>TYPE OF account ("btc")</td>
+        </tr>
+        <tr>
+          <td>description</td>
+          <td>String</td>
+          <td>YES</td>
+          <td>Transaction description</td>
+        </tr>
+        <tr>
+          <td>callbackUrl</td>
+          <td>String</td>
+          <td>YES</td>
+          <td>Webhook URL for transaction status updates</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h4>Sample Payload:</h4>
+    <pre><code>
+  <span class="json-key">"externalTransactionId"</span>: <span class="json-string">"1121"</span>,
+  <span class="json-key">"account_name"</span>: <span class="json-string">"John Doe"</span>,
+  <span class="json-key">"amount"</span>: <span class="json-string">"1"</span>,
+  <span class="json-key">"account_number"</span>: <span class="json-string">"btc wallet address"</span>,
+  <span class="json-key">"account_type"</span>: <span class="json-string">"btc"</span>,
+  <span class="json-key">"description"</span>: <span class="json-string">"BTC to 2"</span>,
+  <span class="json-key">"callbackUrl"</span>: <span class="json-string">"https://webhook.site/426d06e1-9fd2-4ce6-9326-1a6be60bdb20"</span>
+</code></pre>
+
+    <h3>12. Debit Transaction (BTC)</h3>
+    <p>Request funds in BTC from a specific account.</p>
+
+    <div class="endpoint">
+      <div><span class="method">Method:</span> POST</div>
+      <div>
+        <span class="method">URL:</span>
+        <span class="url">https://doronpay.com/api/hub/debit</span>
+      </div>
+    </div>
+
+    <h4>Request Payload:</h4>
+    <table>
+      <thead>
+        <tr>
+          <th>Params</th>
+          <th>Value Type</th>
+          <th>Required</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>externalTransactionId</td>
+          <td>String</td>
+          <td>YES</td>
+          <td>Unique transaction identifier</td>
+        </tr>
+        <tr>
+          <td>account_name</td>
+          <td>String</td>
+          <td>YES</td>
+          <td>Account holder's name</td>
+        </tr>
+        <tr>
+          <td>account_type</td>
+          <td>String</td>
+          <td>YES</td>
+          <td>Type of account ("btc")</td>
+        </tr>
+        <tr>
+          <td>amount</td>
+          <td>String</td>
+          <td>YES</td>
+          <td>Transaction amount</td>
+        </tr>
+        <tr>
+          <td>description</td>
+          <td>String</td>
+          <td>YES</td>
+          <td>Brief description of the transaction</td>
+        </tr>
+        <tr>
+          <td>callbackUrl</td>
+          <td>String</td>
+          <td>YES</td>
+          <td>Webhook URL for transaction status updates</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h4>Sample Payload:</h4>
+    <pre><code>
+  <span class="json-key">"externalTransactionId"</span>: <span class="json-string">"111"</span>,
+  <span class="json-key">"account_name"</span>: <span class="json-string">"John Doe"</span>,
+  <span class="json-key">"account_type"</span>: <span class="json-string">"btc"</span>,
+  <span class="json-key">"amount"</span>: <span class="json-string">"1"</span>,
+  <span class="json-key">"description"</span>: <span class="json-string">"Transaction payment"</span>,
+  <span class="json-key">"callbackUrl"</span>: <span class="json-string">"https://webhook.site/426d06e1-9fd2-4ce6-9326-1a6be60bdb20"</span>
+</code></pre>
+
+    <h3>Responses and Error Codes</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Code</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>00</td>
+          <td>
+            Transaction successful. Payment received and processed successfully
+          </td>
+        </tr>
+        <tr>
+          <td>01</td>
+          <td>Transaction received for processing</td>
+        </tr>
+        <tr>
+          <td>02</td>
+          <td>Transaction failed</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="page-number">13 / 13</div>
+  </body>
+</html>

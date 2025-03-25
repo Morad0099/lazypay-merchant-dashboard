@@ -150,4 +150,12 @@ export class SidebarComponent implements OnInit {
       this.router.navigate(['/login']);
     }
   }
+
+  openSettings(): void {
+    this.router.navigate(['/documentation']);
+  }
+
+  openHelp(): void {
+    this.router.navigate(['/help']);
+  }
 }

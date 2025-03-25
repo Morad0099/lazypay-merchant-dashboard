@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DoronPay - Help Center</title>
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --accent-color: #4895ef;
+            --text-color: #333;
+            --light-gray: #f5f7fa;
+            --border-color: #e1e5eb;
+            --success-color: #4caf50;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: #fff;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .help-header {
+            text-align: center;
+            padding: 40px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .logo-container {
+            /* background-color: #000; */
+            width: 100%;
+            padding: 30px 0;
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            max-width: 500px;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+        
+        .help-title {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+        
+        .help-subtitle {
+            font-size: 1.2rem;
+            color: #666;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .help-content {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 40px 0;
+            gap: 30px;
+        }
+        
+        .help-section {
+            flex: 1;
+            min-width: 300px;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--accent-color);
+            color: var(--secondary-color);
+        }
+        
+        .contact-info {
+            background-color: var(--light-gray);
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        
+        .contact-item {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .contact-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .contact-icon {
+            width: 24px;
+            margin-right: 15px;
+            color: var(--primary-color);
+        }
+        
+        .contact-text {
+            flex: 1;
+        }
+        
+        .contact-label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            display: block;
+        }
+        
+        .contact-value {
+            color: #555;
+        }
+        
+        .contact-value a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        
+        .contact-value a:hover {
+            text-decoration: underline;
+        }
+        
+        .contact-hours {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .hours-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .faq-section {
+            flex: 2;
+            min-width: 300px;
+        }
+        
+        .faq-item {
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 20px;
+        }
+        
+        .faq-question {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            color: var(--secondary-color);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .faq-question:after {
+            content: '+';
+            font-size: 1.5rem;
+            color: var(--primary-color);
+        }
+        
+        .faq-answer {
+            color: #555;
+            padding: 10px 0;
+        }
+        
+        .support-button {
+            display: inline-block;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 20px;
+            transition: background-color 0.3s;
+        }
+        
+        .support-button:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        .help-footer {
+            background-color: var(--light-gray);
+            padding: 30px 0;
+            text-align: center;
+            margin-top: 40px;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .help-footer p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .social-links {
+            margin-top: 20px;
+        }
+        
+        .social-link {
+            display: inline-block;
+            margin: 0 10px;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .chat-badge {
+            background-color: var(--success-color);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            margin-left: 8px;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .help-content {
+                flex-direction: column;
+            }
+            
+            .help-section {
+                width: 100%;
+            }
+            
+            .help-title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="help-header">
+            <div class="logo-container">
+                <!-- Replace with your actual logo path -->
+                <img src="assets/images/doron-pay-04.png" alt="DoronPay Logo" class="logo">
+            </div>
+            <h1 class="help-title">How Can We Help?</h1>
+            <p class="help-subtitle">Find answers to frequently asked questions or contact our support team for assistance.</p>
+        </header>
+        
+        <div class="help-content">
+            <div class="help-section">
+                <h2 class="section-title">Contact Us</h2>
+                
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M19.95 21q-3.125 0-6.175-1.363T8.1 15.9q-2.413-2.412-3.775-5.463T3 4.05q0-.45.3-.75t.75-.3H8.1q.35 0 .625.225t.325.575l.65 3.5q.05.35-.013.638T9.4 8.45L6.975 10.9q1.05 1.8 2.638 3.375T13.1 17l2.35-2.35q.225-.225.588-.337t.712-.063l3.45.7q.35.075.575.338T21 15.9v4.05q0 .45-.3.75t-.75.3Z"/></svg>
+                        </div>
+                        <div class="contact-text">
+                            <span class="contact-label">Phone Support</span>
+                            <span class="contact-value">
+                                <a href="tel:+233302123456">+233 302 123 456</a>
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-.4 4.25l-7.07 4.42c-.32.2-.74.2-1.06 0L4.4 8.25a.85.85 0 1 1 .9-1.44L12 11l6.7-4.19a.85.85 0 0 1 .9 1.44z"/></svg>
+                        </div>
+                        <div class="contact-text">
+                            <span class="contact-label">Email</span>
+                            <span class="contact-value">
+                                <a href="mailto:support@Doronpay.com">info&#64;doronpay.com</a>
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zM12 11.5a2.5 2.5 0 0 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg>
+                        </div>
+                        <div class="contact-text">
+                            <span class="contact-label">Address</span>
+                            <span class="contact-value">
+                                14 Independence Avenue<br>
+                                Accra Central<br>
+                                Accra, Ghana
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1a11 11 0 1 0 11 11A11 11 0 0 0 12 1zm0 20a9 9 0 1 1 9-9 9 9 0 0 1-9 9z"/><path d="M16.5 11.5h-4v-5a1 1 0 0 0-2 0v6a1 1 0 0 0 1 1h5a1 1 0 0 0 0-2z"/></svg>
+                        </div>
+                        <div class="contact-text">
+                            <span class="contact-label">Live Chat</span>
+                            <span class="contact-value">
+                                Available on our website and mobile app
+                                <span class="chat-badge">Online</span>
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-hours">
+                        <h4 class="hours-title">Support Hours</h4>
+                        <p>Monday to Friday: 8:00 AM - 8:00 PM</p>
+                        <p>Saturday: 9:00 AM - 5:00 PM</p>
+                        <p>Sunday: Closed</p>
+                    </div>
+                </div>
+                
+                <a href="#" class="support-button">Create Support Ticket</a>
+            </div>
+            
+            <div class="help-section faq-section">
+                <h2 class="section-title">Frequently Asked Questions</h2>
+                
+                <div class="faq-item">
+                    <div class="faq-question">How do I create a DoronPay merchant account?</div>
+                    <div class="faq-answer">
+                        To create a DoronPay merchant account, visit our website and click on the "Sign Up" button. Complete the registration form with your business details, verify your email, and submit the required documentation for verification. Once approved, you'll receive your merchant credentials to start accepting payments.
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">What payment methods does DoronPay support?</div>
+                    <div class="faq-answer">
+                        DoronPay supports a wide range of payment methods including mobile money (MTN, Vodafone, AirtelTigo), bank transfers, card payments, and cryptocurrencies (USDT and BTC). This allows your customers to use their preferred payment option when making transactions.
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">How do I integrate DoronPay with my website?</div>
+                    <div class="faq-answer">
+                        Integrating DoronPay is simple. Once you have your API credentials, you can use our REST APIs to implement payment functionality on your website. We provide comprehensive API documentation, client libraries for popular programming languages, and plugins for major e-commerce platforms to make integration seamless.
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">What are the transaction fees?</div>
+                    <div class="faq-answer">
+                        Our transaction fees vary based on your payment volume and the payment method used. Generally, mobile money transactions have a fee of 1-2%, bank transfers 1.5%, and card payments 2.5%. High-volume merchants are eligible for custom rates. Please contact our sales team for a personalized quote based on your business needs.
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">How long does it take to receive payments?</div>
+                    <div class="faq-answer">
+                        Mobile money transactions are typically processed in real-time. Bank transfers are processed within 24 hours during business days. Settlement to your account follows your configured settlement schedule, which can be daily, weekly, or monthly. Premium merchants can access instant settlements for an additional fee.
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">How do I set up USSD payments?</div>
+                    <div class="faq-answer">
+                        To set up USSD payments, log into your merchant dashboard, navigate to the Hub section, and click "Update Wallet Details Icon." Enter your USSD shortcode, provide a callback URL for payment notifications, enable USSD Payments using the checkbox, and save your configuration by clicking "Update Settings." No technical integration is required.
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">Is DoronPay secure for processing payments?</div>
+                    <div class="faq-answer">
+                        Yes, DoronPay employs industry-standard security measures including end-to-end encryption, PCI DSS compliance, two-factor authentication, and regular security audits. All sensitive data is encrypted and securely stored. We also monitor transactions in real-time to detect and prevent fraudulent activities, ensuring both merchants and customers are protected.
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">How do I view my transaction history?</div>
+                    <div class="faq-answer">
+                        You can view your complete transaction history by logging into your merchant dashboard. The dashboard provides a comprehensive overview of all transactions, including successful payments, failed attempts, and pending transactions. You can filter by date range, payment method, transaction status, and export reports in various formats for your accounting needs.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer class="help-footer">
+        <div class="container">
+            <p>If you couldn't find what you were looking for, please contact our support team.</p>
+            <div class="social-links">
+                <a href="#" class="social-link">Facebook</a>
+                <a href="#" class="social-link">Twitter</a>
+                <a href="#" class="social-link">LinkedIn</a>
+                <a href="#" class="social-link">Instagram</a>
+            </div>
+            <p>&copy; 2025 DoronPay. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Simple FAQ toggle functionality
+        document.querySelectorAll('.faq-question').forEach(question => {
+            question.addEventListener('click', () => {
+                const answer = question.nextElementSibling;
+                const isOpen = answer.style.display === 'block';
+                
+                // Close all answers
+                document.querySelectorAll('.faq-answer').forEach(a => {
+                    a.style.display = 'none';
+                });
+                
+                // Reset all question markers
+                document.querySelectorAll('.faq-question').forEach(q => {
+                    q.style.fontWeight = '600';
+                    q.style.color = 'var(--secondary-color)';
+                });
+                
+                if (!isOpen) {
+                    answer.style.display = 'block';
+                    question.style.fontWeight = '700';
+                    question.style.color = 'var(--primary-color)';
+                }
+            });
+        });
+        
+        // Hide all answers initially
+        document.querySelectorAll('.faq-answer').forEach(answer => {
+            answer.style.display = 'none';
+        });
+    </script>
+</body>
+</html>

@@ -10,7 +10,7 @@
     >
       <a class="flex items-center">
         <img
-          src="../../../assets/images/doron.png"
+          src="../../../assets/images/doron22.png"
           alt="Logo"
           class="h-8 w-auto"
         />
@@ -66,17 +66,19 @@
     >
       <button
         class="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+        (click)="openSettings()"
       >
-        <i class="bi bi-gear text-xl"></i>
+        <i class="bi bi-files text-xl"></i>
         <span
           class="ml-3 transition-opacity duration-300"
           [class.opacity-0]="isCollapsed"
-          >Settings</span
+          >Documentation</span
         >
       </button>
 
       <button
         class="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+        (click)="openHelp()"
       >
         <i class="bi bi-question-circle text-xl"></i>
         <span

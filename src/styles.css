@@ -5,6 +5,26 @@
     box-sizing: border-box;
 }
 
+/* Hide scrollbar for the entire page (viewport) */
+html {
+    scrollbar-width: none; /* For Firefox */
+    -ms-overflow-style: none; /* For Internet Explorer and Edge */
+  }
+  
+  html::-webkit-scrollbar {
+    display: none; /* For Chrome, Safari, and Opera */
+  }
+  
+  /* Hide scrollbar for all elements */
+  * {
+    scrollbar-width: none; /* For Firefox */
+    -ms-overflow-style: none; /* For Internet Explorer and Edge */
+  }
+  
+  *::-webkit-scrollbar {
+    display: none; /* For Chrome, Safari, and Opera */
+  }
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

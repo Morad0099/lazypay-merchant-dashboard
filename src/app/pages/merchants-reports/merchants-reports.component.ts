@@ -19,9 +19,27 @@ interface ReportFilters {
   endDate: string;
   status: string;
   merchantId: string;
+  operator: string;
+  // merchantId: string;
   transaction_type: string;
   page: number;
   limit: number;
+}
+
+enum EOperator {
+  DORON = 'DORON',
+  PEOPLESPAY = 'PEOPLESPAY',
+  FIDELITY = 'FIDELITY',
+  SOLANA = 'SOLANA',
+  GTCARD = 'GTCARD', // GTBank card payment
+  MOOLRE = 'MOOLRE',
+  PCARD = 'PCARD', // Peoplespay Card payment
+  TRC20 = 'TRC20',
+  ERC20 = 'ERC20',
+  GTB = 'GTB',
+  FAB = 'FAB',
+  BTC = 'BTC',
+  GIP = 'GIP',
 }
 
 interface ReportStats {
@@ -48,6 +66,10 @@ interface Transaction {
   merchantId: any;
   customerId: any;
   walletType: string;
+  balanceBeforeCredit: number;
+  balanceAfterCredit: number;
+  balanceBeforeDebit: number;
+  balanceAfterDebit: number;
 }
 
 interface ReportResponse {
@@ -87,7 +109,7 @@ const paymentIssuerImages: { [key: string]: string } = {
   standalone: true,
   imports: [CommonModule, FormsModule, TransactionModalComponent],
   template: `
-    <div class="p-6 max-w-7xl mx-auto">
+    <div class="p-6 max-w-7xl mx-auto; reports-container">
       <!-- Header -->
       <div class="mb-8">
         <h1 class="text-3xl font-bold text-gray-900">Transaction Reports</h1>
@@ -99,7 +121,7 @@ const paymentIssuerImages: { [key: string]: string } = {
       <!-- Stats Cards -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div
-          class="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow border border-gray-100"
+          class="bg-white rounded-2xl p-6 border-sm hover:border-md transition-border border border-gray-100"
         >
           <p class="text-blue-600 mb-2 text-sm font-medium">
             Total Transactions
@@ -119,7 +141,7 @@ const paymentIssuerImages: { [key: string]: string } = {
         </div>
 
         <div
-          class="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow border border-gray-100"
+          class="bg-white rounded-2xl p-6 border-sm hover:border-md transition-border border border-gray-100"
         >
           <p class="text-green-600 mb-2 text-sm font-medium">Total Amount</p>
           <p class="text-2xl font-bold text-gray-900">
@@ -136,7 +158,7 @@ const paymentIssuerImages: { [key: string]: string } = {
         </div>
 
         <div
-          class="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow border border-gray-100"
+          class="bg-white rounded-2xl p-6 border-sm hover:border-md transition-border border border-gray-100"
         >
           <p class="text-indigo-600 mb-2 text-sm font-medium">Net Amount</p>
           <p class="text-2xl font-bold text-gray-900">
@@ -154,7 +176,7 @@ const paymentIssuerImages: { [key: string]: string } = {
         </div>
 
         <div
-          class="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow border border-gray-100"
+          class="bg-white rounded-2xl p-6 border-sm hover:border-md transition-border border border-gray-100"
         >
           <p class="text-red-600 mb-2 text-sm font-medium">Total Charges</p>
           <p class="text-2xl font-bold text-gray-900">
@@ -171,7 +193,7 @@ const paymentIssuerImages: { [key: string]: string } = {
       </div>
 
       <!-- Search & Filters -->
-      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 mb-8">
+      <div class="bg-white rounded-2xl border-sm border border-gray-100 mb-8">
         <div class="p-6 border-b border-gray-100">
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <!-- Phone Search -->
@@ -288,6 +310,52 @@ const paymentIssuerImages: { [key: string]: string } = {
                 </div>
               </div>
             </div>
+
+            <!-- Add the new dropdowns for merchants and operators -->
+            <!-- <div class="bg-gray-50 p-4 rounded-xl">
+              <label class="block text-sm font-medium text-gray-900 mb-3"
+                >Merchant</label
+              >
+              <div class="relative">
+                <i
+                  class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                  >store</i
+                >
+                <select
+                  [(ngModel)]="filters.merchantId"
+                  class="pl-10 w-full h-12 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 appearance-none"
+                >
+                  <option value="">All Merchants</option>
+                  <option
+                    *ngFor="let merchant of merchants"
+                    [value]="merchant._id"
+                  >
+                    {{ merchant.merchant_tradeName || merchant.email }}
+                  </option>
+                </select>
+              </div>
+            </div> -->
+
+            <div class="bg-gray-50 p-4 rounded-xl">
+              <label class="block text-sm font-medium text-gray-900 mb-3"
+                >Operator</label
+              >
+              <div class="relative">
+                <i
+                  class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                  >settings</i
+                >
+                <select
+                  [(ngModel)]="filters.operator"
+                  class="pl-10 w-full h-12 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 appearance-none"
+                >
+                  <option value="">All Operators</option>
+                  <option *ngFor="let operator of operators" [value]="operator">
+                    {{ operator }}
+                  </option>
+                </select>
+              </div>
+            </div>
           </div>
 
           <!-- Action Buttons -->
@@ -348,35 +416,31 @@ const paymentIssuerImages: { [key: string]: string } = {
                 </td>
                 <td class="px-6 py-4">
                   <div class="text-sm font-medium text-gray-900">
-                    {{
-                      tx.customerId?.merchant_tradeName ??
-                        tx.merchantId?.merchant_tradeName
-                    }}
+                  {{ tx.customerId?.merchant_tradeName ?? tx.merchantId?.merchant_tradeName ?? 'Unknown' }}
+
+
                   </div>
                   <div class="text-sm text-gray-500">
                     {{ tx.customerId?.email ?? tx.merchantId?.email }}
                   </div>
                 </td>
                 <td class="px-6 py-4">
-                  <div class="text-sm font-medium text-gray-900">
-                    {{ tx.payment_account_name }}
-                  </div>
-                  <div class="text-sm text-gray-500">
-                    {{ tx.payment_account_number }}
-                    <span class="text-xs text-gray-400"
-                      >({{ tx.payment_account_issuer }}
-                      {{ tx.payment_account_type }})</span
-                    >
-                    <img
-                      *ngIf="getPaymentIssuerImage(tx.payment_account_issuer)"
-                      [src]="getPaymentIssuerImage(tx.payment_account_issuer)"
-                      alt="{{ tx.payment_account_issuer }}"
-                      class="w-6 h-6 inline-block ml-2"
-                    />
-                  </div>
-                </td>
+      <div class="text-sm font-medium text-gray-900">
+        {{ getSafeValue(tx.payment_account_name) }}
+      </div>
+      <div class="text-sm text-gray-500">
+        {{ getSafeValue(tx.payment_account_number) }}
+        <span *ngIf="tx.payment_account_issuer || tx.payment_account_type" class="text-xs text-gray-400">
+          ({{ getSafeValue(tx.payment_account_issuer) }} {{ getSafeValue(tx.payment_account_type) }})
+        </span>
+        <img *ngIf="getSafeImage(tx.payment_account_issuer)" 
+             [src]="getSafeImage(tx.payment_account_issuer)" 
+             alt="{{ tx.payment_account_issuer }}" 
+             class="w-6 h-6 inline-block ml-2">
+      </div>
+    </td>
                 <td class="px-6 py-4 text-sm text-gray-900">
-                  {{ formatCurrency(tx.amount, tx.walletType) }}
+                  {{ formatCurrency(tx.amount, tx.walletType)}}
                 </td>
                 <td class="px-6 py-4 text-sm text-red-600">
                   {{ formatCurrency(tx.charges, tx.walletType) }}
@@ -507,6 +571,9 @@ const paymentIssuerImages: { [key: string]: string } = {
 export class ReportsComponent implements OnInit {
   selectedTransaction: ApiTransaction | null = null;
   showModal = false;
+  merchants: any[] = [];
+  operators = Object.values(EOperator);
+
   // Add to your existing properties
   searchFilters: SearchFilters = {
     phone: '',
@@ -521,6 +588,7 @@ export class ReportsComponent implements OnInit {
     transaction_type: '',
     limit: 100,
     merchantId: '',
+    operator: '',
     page: 1,
   };
 
@@ -568,6 +636,35 @@ export class ReportsComponent implements OnInit {
     this.showModal = false;
     this.selectedTransaction = null;
   }
+
+  async fetchMerchants() {
+    try {
+      const response = await this.http
+        .get<any>('https://doronpay.com/api/merchants/get', {
+          headers: this.getHeaders(),
+        })
+        .toPromise();
+
+      if (response?.success) {
+        this.merchants = response.data;
+      } else {
+        console.error('Failed to fetch merchants:', response?.message);
+      }
+    } catch (err) {
+      console.error('Error fetching merchants:', err);
+    }
+  }
+
+  getSafeValue(value: any, fallback: string = 'N/A'): string {
+    return value !== null && value !== undefined ? value.toString() : fallback;
+  }
+  
+  getSafeImage(issuer: string | undefined): string | null {
+    if (!issuer) return null;
+    const key = issuer.toLowerCase();
+    return paymentIssuerImages[key] || null;
+  }
+  
 
   ngOnInit() {
     this.filters.merchantId = this.store.selectSnapshot(
@@ -790,9 +887,9 @@ export class ReportsComponent implements OnInit {
       this.transactions.map((tx) => ({
         Date: this.formatDate(tx.createdAt),
         Merchant:
-          tx.customerId?.merchant_tradeName ||
-          tx.merchantId?.merchant_tradeName,
-        'Merchant Email': tx.customerId.email,
+          // tx.customerId?.merchant_tradeName ||-
+          tx.merchantId?._id,
+        'Merchant Email': tx.customerId?.email || tx.merchantId?.email,
         'Customer Name': tx.payment_account_name,
         'Customer Account': tx.payment_account_number,
         'Payment Method': `${tx.payment_account_issuer} ${tx.payment_account_type}`,
@@ -803,6 +900,14 @@ export class ReportsComponent implements OnInit {
         Status: tx.status,
         Reference: tx.transactionRef,
         Description: tx.description,
+        'Balance Before Debit':
+          tx.walletType === 'FIAT' ? tx.balanceBeforeCredit : '',
+        'Balance After Debit':
+          tx.walletType === 'FIAT' ? tx.balanceAfterCredit : '',
+        'Balance Before Credit':
+          tx.walletType === 'FIAT' ? tx.balanceBeforeDebit : '',
+        'Balance After Credit':
+          tx.walletType === 'FIAT' ? tx.balanceAfterDebit : '',
       }))
     );
 
@@ -814,7 +919,6 @@ export class ReportsComponent implements OnInit {
     )}.xlsx`;
     XLSX.writeFile(workbook, fileName);
   }
-
   formatDate(date: string): string {
     return new Date(date).toLocaleDateString('en-GB', {
       day: '2-digit',
