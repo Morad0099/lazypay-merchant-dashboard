@@ -13,6 +13,10 @@ export class RecipientService {
 
   constructor(private http: HttpClient) { }
 
+  getBanks(): Observable<any> {
+    return this.http.get<any>(`${url}/hub/banks/get`);
+  }
+
   getRecipients(
     merchantId: string, 
     page: number = 1, 

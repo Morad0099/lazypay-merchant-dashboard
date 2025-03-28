@@ -153,14 +153,15 @@
                   id="accountType" 
                   formControlName="accountType" 
                   class="block appearance-none w-full border border-gray-300 rounded-lg py-2 px-3 pr-8 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                  <option value="">Select an account type</option>
                   <option *ngFor="let type of accountTypes" [value]="type">
-                    {{ type === 'bank' ? 'Bank Account' : 
-                       type === 'momo' ? 'Mobile Money' : 
-                     
-                       type === 'btc' ? 'Bitcoin' : 
-                       type === 'trc20' ? 'TRC20' : 
-                       type === 'erc20' ? 'ERC20' : 
-                       type === 'solana' ? 'Solana' : type }}
+                  {{
+                  type === 'bank' ? 'Bank Account' : 
+                     type === 'momo' ? 'Mobile Money' : 
+                     type === 'btc' ? 'Bitcoin' : 
+                     type === 'trc20' ? 'TRC20' : 
+                     type === 'erc20' ? 'ERC20' : 
+                     type === 'solana' ? 'Solana' : type }}
                   </option>
                 </select>
                 <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
@@ -178,22 +179,64 @@
             </div>
             
             <div>
-              <label for="accountIssuer" class="block text-sm font-medium text-gray-700 mb-1">Bank / Provider*</label>
+              <label for="accountIssuer" class="block text-sm font-medium text-gray-700 mb-1">
+                {{ recipientForm.get('accountType')?.value === PaymentAccountType.BANK ? 'Bank*' : 
+                   recipientForm.get('accountType')?.value === PaymentAccountType.MOMO ? 'Mobile Network*' : 'Bank / Provider' }}
+              </label>
+              
+              <!-- Bank Dropdown -->
+              <div *ngIf="showBankDropdown" class="relative">
+                <select 
+                  id="accountIssuer" 
+                  formControlName="accountIssuer" 
+                  class="block appearance-none w-full border border-gray-300 rounded-lg py-2 px-3 pr-8 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                  <option value="">Select Bank</option>
+                  <option *ngFor="let bank of bankOptions" [value]="bank.BankCode">
+                    {{ bank.BankName }}
+                  </option>
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                  <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                    <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                  </svg>
+                </div>
+              </div>
+              
+              <!-- Mobile Money Dropdown -->
+              <div *ngIf="showMomoDropdown" class="relative">
+                <select 
+                  id="accountIssuer" 
+                  formControlName="accountIssuer" 
+                  class="block appearance-none w-full border border-gray-300 rounded-lg py-2 px-3 pr-8 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                  <option value="">Select Mobile Network</option>
+                  <option *ngFor="let network of momoNetworks" [value]="network">
+                    {{ network === 'mtn' ? 'MTN' : 
+                       network === 'vodafone' ? 'Vodafone' : 
+                       network === 'airteltigo' ? 'AirtelTigo' : network }}
+                  </option>
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                  <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                    <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
+                  </svg>
+                </div>
+              </div>
+              
+              <!-- Regular Input (for other types where issuer is optional) -->
               <input 
+                *ngIf="showIssuerInput"
                 type="text" 
                 id="accountIssuer" 
                 formControlName="accountIssuer" 
-                list="bankOptions"
                 class="block w-full border border-gray-300 rounded-lg py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500" 
                 placeholder="Enter bank or provider name">
-              <datalist id="bankOptions">
-                <option *ngFor="let bank of bankOptions" [value]="bank"></option>
-              </datalist>
+              
               <div *ngIf="recipientForm.get('accountIssuer')?.touched && recipientForm.get('accountIssuer')?.hasError('required')" class="mt-1 text-sm text-red-600 flex items-center">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor">
                   <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
                 </svg>
-                Bank / Provider is required
+                {{ recipientForm.get('accountType')?.value === PaymentAccountType.BANK ? 'Bank is required' : 
+                   recipientForm.get('accountType')?.value === PaymentAccountType.MOMO ? 'Mobile network is required' : 'Bank / Provider is required' }}
               </div>
             </div>
           </div>

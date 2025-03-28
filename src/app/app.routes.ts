@@ -26,6 +26,7 @@ import { PaymentLinkGeneratorComponent } from './pages/payment-link-generator/pa
 import { PaymentLinksPageComponent } from './pages/payment-links-page/payment-links-page.component';
 import { DocumentationComponent } from './pages/documentation/documentation.component';
 import { HelpComponent } from './pages/help/help.component';
+import { AuthorizersListComponent } from './pages/authorizers-list/authorizers-list.component';
 
 export const routes: Routes = [
   {
@@ -141,6 +142,10 @@ export const routes: Routes = [
       {
         path: 'recipient/edit/:id',
         component: RecipientFormComponent
+      },
+      {
+        path: 'authorizers',
+        component: AuthorizersListComponent,
       },
       {
         path: 'documentation',

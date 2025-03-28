@@ -31,6 +31,7 @@ export const Routes: RouteInfo[] = [
   { path: 'recipients', title: 'Recipients', class: 'false' },
   { path: 'recurring', title: 'Recurring Payroll', class: 'false' },
   { path: 'upcoming', title: 'Upcoming Payroll Runs', class: 'false' },
+  { path: 'authorizers', title: 'Authorizers', class: 'false' },
   // { path: 'payment-links', title: 'Payment Links', class: 'false' },
   { path: 'payment-links-list', title: 'Payment Links List', class: 'false' },
   { path: 'kyc', title: 'KYC', class: 'false' },
@@ -138,6 +139,7 @@ export class SidebarComponent implements OnInit {
       upcoming: 'bi bi-calendar-event',
       'payment-links': 'bi bi-link-45deg',
       'payment-links-list': 'bi bi-list',
+      'authorizers': 'bi bi-person-check',
       // 'dashboard': 'bi bi-bar-chart',
     };
 

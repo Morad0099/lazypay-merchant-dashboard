@@ -5,7 +5,22 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
 import { RecipientService } from '../../service/recipient.service';
-import { Recipient, PaymentAccountType } from '../../models/recipient.model';
+import { Recipient } from '../../models/recipient.model';
+
+export enum EMomoNetworks {
+  MTN = "mtn",
+  VODAFONE = "vodafone",
+  AIRTELTIGO = "airteltigo",
+}
+
+const PaymentAccountType = {
+  BANK: "bank",
+  MOMO: "momo",
+  BTC: "btc",
+  TRC20: "trc20",
+  ERC20: "erc20",
+  SOLANA: "solana"
+};
 
 @Component({
   selector: 'app-recipient-form',
@@ -26,26 +41,22 @@ export class RecipientFormComponent implements OnInit {
   submitting = false;
   error = '';
   success = '';
+  PaymentAccountType = PaymentAccountType;
+
   
   isEditMode = false;
   recipientId: string | null = null;
   
   // Enum for the template
   accountTypes = Object.values(PaymentAccountType);
+    momoNetworks = Object.values(EMomoNetworks);
+    
+    // Bank options from API
+    bankOptions: any[] = [];
+    showBankDropdown = false;
+    showMomoDropdown = false;
+    showIssuerInput = false;
   
-  // Common bank options (example)
-  bankOptions = [
-    'GTBank',
-    'First Bank',
-    'UBA',
-    'Access Bank',
-    'Zenith Bank',
-    'Fidelity Bank',
-    'Ecobank',
-    'FCMB',
-    'Stanbic IBTC Bank',
-    'Union Bank'
-  ];
   
   // Getting merchantId from localStorage
   merchantId: string = '';
@@ -59,6 +70,11 @@ export class RecipientFormComponent implements OnInit {
     this.getMerchantIdFromLocalStorage();
     
     this.recipientForm = this.createForm();
+
+    // Watch for account type changes
+    this.recipientForm.get('accountType')?.valueChanges.subscribe(type => {
+      this.handleAccountTypeChange(type);
+    });
   }
 
   ngOnInit(): void {
@@ -85,6 +101,10 @@ export class RecipientFormComponent implements OnInit {
               position: recipient.position,
               merchantId: this.merchantId
             });
+            
+            // Handle the account type UI based on loaded data
+            this.handleAccountTypeChange(recipient.accountType);
+            
             this.loading = false;
           },
           error: (error) => {
@@ -92,7 +112,67 @@ export class RecipientFormComponent implements OnInit {
             this.loading = false;
           }
         });
+    } else {
+      // For new recipients, load banks if default is BANK
+      if (this.recipientForm.get('accountType')?.value === PaymentAccountType.BANK) {
+        this.loadBanks();
+      }
     }
+  }
+  
+  handleAccountTypeChange(type: keyof typeof PaymentAccountType): void {
+    // Reset all visibility flags
+    this.showBankDropdown = false;
+    this.showMomoDropdown = false;
+    this.showIssuerInput = false;
+    
+    // Clear validators for accountIssuer initially
+    this.recipientForm.get('accountIssuer')?.clearValidators();
+    
+    // Set validators and UI based on account type
+    switch (type) {
+      case PaymentAccountType.BANK:
+        this.showBankDropdown = true;
+        this.recipientForm.get('accountIssuer')?.setValidators([Validators.required]);
+        this.loadBanks();
+        break;
+        
+      case PaymentAccountType.MOMO:
+        this.showMomoDropdown = true;
+        this.recipientForm.get('accountIssuer')?.setValidators([Validators.required]);
+        break;
+        
+      case PaymentAccountType.BTC:
+      case PaymentAccountType.TRC20:
+      case PaymentAccountType.ERC20:
+      case PaymentAccountType.SOLANA:
+        // For crypto, we don't need issuer
+        this.showIssuerInput = false;
+        break;
+        
+      default:
+        // For other types, show regular input
+        this.showIssuerInput = true;
+        this.recipientForm.get('accountIssuer')?.setValidators([Validators.required]);
+        break;
+    }
+    
+    // Update validation
+    this.recipientForm.get('accountIssuer')?.updateValueAndValidity();
+  }
+  
+  loadBanks(): void {
+    this.recipientService.getBanks().subscribe({
+      next: (response) => {
+        if (response.success && response.data) {
+          this.bankOptions = response.data;
+        }
+      },
+      error: (error) => {
+        console.error('Failed to load banks:', error);
+        this.error = 'Failed to load bank list. Please try again.';
+      }
+    });
   }
   
   getMerchantIdFromLocalStorage(): void {
