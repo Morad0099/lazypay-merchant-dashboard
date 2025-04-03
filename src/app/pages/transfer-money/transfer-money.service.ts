@@ -574,12 +574,12 @@ private formatTime(seconds: number): string {
         account_number: form.account_number,
         account_type: form.transferType,
         amount: form.amount.toString(),
-        customerId: userId,
-        customerType: 'merchants',
+        merchantId: userId,
+        // customerType: 'merchants',
         description: form.description,
         initiatedBy: initateId,
         otp: form.otp,
-        serviceName: 'banktrf',
+        // serviceName: 'banktrf',
       };
 
       const response = await this.moneyTransferService.sendMoney(payload);
@@ -641,8 +641,8 @@ private formatTime(seconds: number): string {
         account_issuer: form.account_issuer,
         account_number: form.account_number,
         amount: form.amount.toString(),
-        customerId: userId,
-        customerType: 'merchants',
+        merchantId: userId,
+        // customerType: 'merchants',
         otp: form.otp,
       };
 

@@ -34,12 +34,12 @@ export interface SendMoneyPayload {
   account_number: string;
   account_type: 'momo' | 'bank';
   amount: string;
-  customerId: string;
-  customerType: string;
+  merchantId: string;
+  // customerType: string;
   description: string;
   initiatedBy: string;
   otp: string;
-  serviceName: string;
+  // serviceName: string;
 }
 
 export interface CalculateSendPayload {
@@ -57,8 +57,8 @@ export interface FundWalletPayload {
   account_issuer: string;
   account_number: string;
   amount: string;
-  customerId: string;
-  customerType: string;
+  merchantId: string;
+  // customerType: string;
   otp: string;
 }
 
