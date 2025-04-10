@@ -2,7 +2,6 @@
 <div class="min-h-screen py-8 bg-gray-50">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <!-- Stats Overview -->
-    <!-- Stats Overview -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
       <div
         class="bg-white p-6 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300"
@@ -13,7 +12,7 @@
               Total Transactions
             </div>
             <div class="text-2xl font-bold text-gray-900 mt-1">
-              {{ transactions.length }}
+              {{ filteredTransactions.length }}
             </div>
           </div>
           <div class="p-3 bg-blue-50 rounded-lg">
@@ -126,10 +125,79 @@
       </div>
     </div>
 
+    <!-- Date Range Filter -->
+    <div *ngIf="transactions.length > 0" class="bg-white rounded-lg shadow-sm mb-6">
+      <div class="p-4">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center">
+            <input 
+              type="checkbox" 
+              [checked]="dateFilterEnabled"
+              (change)="toggleDateFilter()"
+              id="enableDateFilter"
+              class="mr-2 h-4 w-4 text-blue-600 rounded focus:ring-blue-500"
+            />
+            <label for="enableDateFilter" class="text-sm font-medium text-gray-700">
+              Enable Date Range Filter
+            </label>
+          </div>
+          <button 
+            *ngIf="dateFilterEnabled"
+            (click)="resetFilters()" 
+            class="px-4 py-1.5 bg-gray-100 text-gray-700 text-sm rounded-lg hover:bg-gray-200"
+          >
+            Reset Dates
+          </button>
+        </div>
+        
+        <div *ngIf="dateFilterEnabled" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Start Date
+            </label>
+            <div class="relative">
+              <i class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                calendar_today
+              </i>
+              <input
+                type="date"
+                [(ngModel)]="startDate"
+                [max]="endDate"
+                (change)="onDateFilterChange()"
+                class="pl-10 w-full h-12 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+              />
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              End Date
+            </label>
+            <div class="relative">
+              <i class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                calendar_today
+              </i>
+              <input
+                type="date"
+                [(ngModel)]="endDate"
+                [min]="startDate"
+                (change)="onDateFilterChange()"
+                class="pl-10 w-full h-12 rounded-xl border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+              />
+            </div>
+          </div>
+        </div>
+        
+        <!-- Filter stats summary -->
+        <div *ngIf="dateFilterEnabled && filteredTransactions.length !== transactions.length" class="mt-4 p-3 bg-blue-50 rounded-lg text-sm text-blue-700">
+          Showing {{ filteredTransactions.length }} of {{ transactions.length }} transactions based on date range.
+        </div>
+      </div>
+    </div>
+
     <!-- Transaction List -->
-    <div *ngIf="transactions.length > 0" class="space-y-4">
+    <div *ngIf="filteredTransactions.length > 0" class="space-y-4">
       <div
-        *ngFor="let tx of transactions"
+        *ngFor="let tx of filteredTransactions"
         class="bg-white rounded-lg shadow-sm overflow-hidden"
       >
         <!-- Header -->
@@ -283,6 +351,16 @@
     </div>
 
     <!-- No Results -->
+    <div
+      *ngIf="!filteredTransactions.length && !loading && transactions.length > 0"
+      class="text-center py-12 bg-white rounded-lg shadow-sm"
+    >
+      <p class="text-gray-500">
+        No transactions match the selected date range. Try adjusting your filters.
+      </p>
+    </div>
+
+    <!-- No Transactions -->
     <div
       *ngIf="!transactions.length && !loading"
       class="text-center py-12 bg-white rounded-lg shadow-sm"

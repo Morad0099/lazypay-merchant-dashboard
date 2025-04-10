@@ -1,0 +1,684 @@
+<!-- ticket-management.component.html -->
+<div
+  class="container mx-auto px-4 py-6 bg-gray-50 min-h-screen"
+>
+  <!-- Header Section -->
+  <div class="flex justify-between items-center mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">Support Tickets</h1>
+      <p class="text-gray-500">Create and manage your support tickets</p>
+    </div>
+    <button
+      class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition-colors duration-200"
+      (click)="openNewTicketModal()"
+    >
+      <i class="bi bi-plus"></i>
+      Create Ticket
+    </button>
+  </div>
+
+  <!-- Search and Filter Section -->
+  <div class="bg-white border rounded-lg mb-6 p-4">
+    <div
+      class="flex flex-col md:flex-row md:justify-between md:items-center space-y-4 md:space-y-0"
+    >
+      <!-- Search Input -->
+      <div class="relative w-full md:w-1/3">
+        <div
+          class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
+        >
+          <i class="bi bi-search text-gray-400"></i>
+        </div>
+        <input
+          type="text"
+          class="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+          placeholder="Search tickets by subject, description, reference..."
+          (input)="search($event)"
+        />
+        <button
+          *ngIf="searchTerm"
+          class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+          (click)="clearSearch()"
+        >
+          <i class="bi bi-x-circle"></i>
+        </button>
+      </div>
+
+      <!-- Status Filter -->
+      <div class="flex flex-wrap gap-2">
+        <span class="text-sm text-gray-500 self-center mr-2"
+          >Filter by status:</span
+        >
+        <button
+          class="px-3 py-1 rounded-full text-xs font-medium"
+          [ngClass]="{
+            'bg-gray-800 text-white': statusFilter === 'all',
+            'bg-gray-200 text-gray-700 hover:bg-gray-300':
+              statusFilter !== 'all'
+          }"
+          (click)="filterByStatus('all')"
+        >
+          All
+        </button>
+        <button
+          *ngFor="let status of ticketStatuses"
+          class="px-3 py-1 rounded-full text-xs font-medium"
+          [ngClass]="{
+            'bg-gray-800 text-white': statusFilter === status,
+            'hover:bg-gray-200': statusFilter !== status,
+            'bg-blue-100 text-blue-800':
+              statusFilter !== status && status === 'Open',
+            'bg-yellow-100 text-yellow-800':
+              statusFilter !== status && status === 'In Progress',
+            'bg-green-100 text-green-800':
+              statusFilter !== status && status === 'Resolved',
+            'bg-gray-100 text-gray-800':
+              statusFilter !== status && status === 'Closed'
+          }"
+          (click)="filterByStatus(status)"
+        >
+          {{ status }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tickets Content -->
+  <div class="bg-white border rounded-lg overflow-hidden">
+    <!-- Loading State -->
+    <div class="p-10 text-center" *ngIf="isLoading">
+      <div
+        class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-gray-300 border-t-indigo-600"
+      ></div>
+      <p class="mt-3 text-gray-500">Loading tickets...</p>
+    </div>
+
+    <!-- Error State -->
+    <div class="p-10 text-center" *ngIf="error && !isLoading">
+      <div
+        class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-100 text-red-500"
+      >
+        <i class="bi bi-exclamation-triangle text-2xl"></i>
+      </div>
+      <h3 class="mt-4 text-lg font-medium text-gray-900">
+        Error Loading Tickets
+      </h3>
+      <p class="mt-2 text-gray-500">{{ error }}</p>
+      <button
+        class="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md"
+        (click)="loadTickets()"
+      >
+        Try Again
+      </button>
+    </div>
+
+    <!-- Empty State -->
+    <div
+      class="p-10 text-center"
+      *ngIf="!isLoading && !error && filteredTickets.length === 0"
+    >
+      <div
+        class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-indigo-100 text-indigo-500"
+      >
+        <i class="bi bi-ticket-perforated text-2xl"></i>
+      </div>
+      <h3 class="mt-4 text-lg font-medium text-gray-900">No Tickets Found</h3>
+      <p class="mt-2 text-gray-500">
+        {{
+          searchTerm || statusFilter !== "all"
+            ? "No tickets match your search criteria."
+            : "You have not created any support tickets yet."
+        }}
+      </p>
+      <button
+        class="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md"
+        (click)="openNewTicketModal()"
+      >
+        Create Your First Ticket
+      </button>
+    </div>
+
+    <!-- Tickets Table -->
+    <div
+      class="overflow-x-auto"
+      *ngIf="!isLoading && !error && filteredTickets.length > 0"
+    >
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50">
+          <tr>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Subject
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Category
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Status
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Priority
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Created
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Updated
+            </th>
+            <th
+              class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+            >
+              Action
+            </th>
+          </tr>
+        </thead>
+        <tbody class="bg-white divide-y divide-gray-200">
+          <tr
+            *ngFor="let ticket of filteredTickets"
+            class="hover:bg-gray-50 cursor-pointer"
+            (click)="openTicketDetail(ticket)"
+          >
+            <td class="px-6 py-4">
+              <div class="text-sm font-medium text-gray-900 truncate max-w-xs">
+                {{ ticket.subject }}
+              </div>
+              <div
+                *ngIf="ticket.transactionRef"
+                class="text-xs text-gray-500 mt-1"
+              >
+                Ref: {{ ticket.transactionRef }}
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span
+                class="inline-flex px-2 py-1 text-xs font-medium rounded-full"
+                [ngClass]="getCategoryClass(ticket.category)"
+              >
+                {{ ticket.category }}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span
+                class="inline-flex px-2 py-1 text-xs font-medium rounded-full"
+                [ngClass]="getStatusClass(ticket.status)"
+              >
+                {{ ticket.status }}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <span
+                class="inline-flex px-2 py-1 text-xs font-medium rounded-full"
+                [ngClass]="getPriorityClass(ticket.priority)"
+              >
+                {{ ticket.priority }}
+              </span>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm text-gray-500">
+                {{ formatDate(ticket.createdAt) }}
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <div class="text-sm text-gray-500">
+                {{ formatDate(ticket.updatedAt) }}
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap">
+              <button
+                class="text-indigo-600 hover:text-indigo-900 focus:outline-none"
+                (click)="openTicketDetail(ticket); $event.stopPropagation()"
+              >
+                <i class="bi bi-eye"></i> View
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Success Notification -->
+  <div
+    *ngIf="success"
+    class="fixed bottom-4 right-4 bg-green-50 border-l-4 border-green-500 p-4 shadow-md rounded z-50 max-w-md"
+  >
+    <div class="flex items-start">
+      <div class="flex-shrink-0">
+        <i class="bi bi-check-circle text-green-500"></i>
+      </div>
+      <div class="ml-3">
+        <p class="text-sm text-green-800">{{ success }}</p>
+      </div>
+      <div class="ml-auto pl-3">
+        <button
+          class="text-green-500 hover:text-green-700 focus:outline-none"
+          (click)="success = null"
+        >
+          <i class="bi bi-x"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- New Ticket Modal -->
+  <div
+    class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-40"
+    *ngIf="showNewTicketModal"
+  >
+    <div class="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-auto">
+      <div
+        class="px-6 py-4 border-b border-gray-200 flex justify-between items-center"
+      >
+        <h2 class="text-lg font-medium text-gray-900">
+          Create New Support Ticket
+        </h2>
+        <button
+          class="text-gray-500 hover:text-gray-700 focus:outline-none"
+          (click)="closeNewTicketModal()"
+        >
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+      <div class="p-6">
+        <form [formGroup]="ticketForm" (ngSubmit)="submitTicket()">
+          <!-- Error alert -->
+          <div
+            *ngIf="error"
+            class="mb-4 bg-red-50 border-l-4 border-red-500 p-4 rounded"
+          >
+            <div class="flex items-start">
+              <div class="flex-shrink-0">
+                <i class="bi bi-exclamation-triangle text-red-500"></i>
+              </div>
+              <div class="ml-3">
+                <p class="text-sm text-red-800">{{ error }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Transaction Reference (Optional) -->
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Transaction Reference (Optional)
+            </label>
+            <input
+              type="text"
+              formControlName="transactionRef"
+              class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              placeholder="Enter transaction reference if applicable"
+            />
+          </div>
+
+          <!-- Category -->
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Category <span class="text-red-500">*</span>
+            </label>
+            <select
+              formControlName="category"
+              class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            >
+              <option
+                *ngFor="let category of ticketCategories"
+                [value]="category"
+              >
+                {{ category }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Priority -->
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Priority <span class="text-red-500">*</span>
+            </label>
+            <select
+              formControlName="priority"
+              class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            >
+              <option
+                *ngFor="let priority of ticketPriorities"
+                [value]="priority"
+              >
+                {{ priority }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Subject -->
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Subject <span class="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              formControlName="subject"
+              class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              [ngClass]="{
+                'border-red-500 focus:ring-red-500 focus:border-red-500':
+                  ticketForm.get('subject')?.invalid &&
+                  ticketForm.get('subject')?.touched
+              }"
+              placeholder="Enter a short, descriptive subject"
+            />
+            <div
+              *ngIf="
+                ticketForm.get('subject')?.invalid &&
+                ticketForm.get('subject')?.touched
+              "
+              class="mt-1 text-sm text-red-600"
+            >
+              <span *ngIf="ticketForm.get('subject')?.errors?.['required']"
+                >Subject is required</span
+              >
+              <span *ngIf="ticketForm.get('subject')?.errors?.['minlength']"
+                >Subject must be at least 5 characters long</span
+              >
+              <span *ngIf="ticketForm.get('subject')?.errors?.['maxlength']"
+                >Subject cannot exceed 100 characters</span
+              >
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Description <span class="text-red-500">*</span>
+            </label>
+            <textarea
+              formControlName="description"
+              rows="5"
+              class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              [ngClass]="{
+                'border-red-500 focus:ring-red-500 focus:border-red-500':
+                  ticketForm.get('description')?.invalid &&
+                  ticketForm.get('description')?.touched
+              }"
+              placeholder="Describe your issue in detail"
+            ></textarea>
+            <div
+              *ngIf="
+                ticketForm.get('description')?.invalid &&
+                ticketForm.get('description')?.touched
+              "
+              class="mt-1 text-sm text-red-600"
+            >
+              <span *ngIf="ticketForm.get('description')?.errors?.['required']"
+                >Description is required</span
+              >
+              <span *ngIf="ticketForm.get('description')?.errors?.['minlength']"
+                >Description must be at least 10 characters long</span
+              >
+            </div>
+          </div>
+
+          <div class="flex justify-end space-x-4 mt-6">
+            <button
+              type="button"
+              class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+              (click)="closeNewTicketModal()"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              class="px-4 py-2 bg-indigo-600 border border-transparent rounded-md text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+              [disabled]="ticketForm.invalid || isSubmitting"
+              [ngClass]="{
+                'opacity-75 cursor-not-allowed':
+                  ticketForm.invalid || isSubmitting
+              }"
+            >
+              <div class="flex items-center">
+                <div *ngIf="isSubmitting" class="mr-2">
+                  <div
+                    class="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"
+                  ></div>
+                </div>
+                {{ isSubmitting ? "Creating..." : "Create Ticket" }}
+              </div>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Ticket Detail Modal -->
+<div
+  class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-40"
+  *ngIf="showTicketDetailModal && selectedTicket"
+>
+  <div class="bg-white rounded-lg w-full max-w-3xl max-h-[90vh] overflow-auto">
+    <div
+      class="px-6 py-4 border-b border-gray-200 flex justify-between items-center sticky top-0 bg-white z-10"
+    >
+      <h2 class="text-lg font-medium text-gray-900 truncate max-w-lg">
+        {{ selectedTicket?.subject }}
+      </h2>
+      <button
+        class="text-gray-500 hover:text-gray-700 focus:outline-none"
+        (click)="closeTicketDetailModal()"
+      >
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </div>
+
+    <div class="p-6">
+      <!-- Error alert -->
+      <div
+        *ngIf="error"
+        class="mb-4 bg-red-50 border-l-4 border-red-500 p-4 rounded"
+      >
+        <div class="flex items-start">
+          <div class="flex-shrink-0">
+            <i class="bi bi-exclamation-triangle text-red-500"></i>
+          </div>
+          <div class="ml-3">
+            <p class="text-sm text-red-800">{{ error }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ticket Info -->
+      <div class="bg-gray-50 rounded-lg p-4 mb-6">
+        <div class="flex flex-wrap gap-4 mb-4">
+          <div>
+            <span class="text-xs text-gray-500">Status</span>
+            <span
+              class="ml-2 inline-flex px-2 py-1 text-xs font-medium rounded-full"
+              [ngClass]="getStatusClass(selectedTicket?.status)"
+            >
+              {{ selectedTicket?.status }}
+            </span>
+          </div>
+          <div>
+            <span class="text-xs text-gray-500">Priority</span>
+            <span
+              class="ml-2 inline-flex px-2 py-1 text-xs font-medium rounded-full"
+              [ngClass]="getPriorityClass(selectedTicket?.priority)"
+            >
+              {{ selectedTicket?.priority }}
+            </span>
+          </div>
+          <div>
+            <span class="text-xs text-gray-500">Category</span>
+            <span
+              class="ml-2 inline-flex px-2 py-1 text-xs font-medium rounded-full"
+              [ngClass]="getCategoryClass(selectedTicket?.category)"
+            >
+              {{ selectedTicket?.category }}
+            </span>
+          </div>
+          <div *ngIf="selectedTicket?.transactionRef">
+            <span class="text-xs text-gray-500">Transaction Ref</span>
+            <span class="ml-2 text-xs font-medium">
+              {{ selectedTicket?.transactionRef }}
+            </span>
+          </div>
+        </div>
+
+        <div class="flex justify-between text-xs text-gray-500 mb-4">
+          <div>Created: {{ formatDate(selectedTicket?.createdAt) }}</div>
+          <div>Updated: {{ formatDate(selectedTicket?.updatedAt) }}</div>
+        </div>
+
+        <div>
+          <h3 class="text-sm font-medium text-gray-700 mb-2">Description</h3>
+          <p
+            class="text-sm text-gray-600 whitespace-pre-line bg-white p-3 rounded border border-gray-200"
+          >
+            {{ selectedTicket?.description }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Comments Section -->
+      <div>
+        <h3 class="text-md font-medium text-gray-700 mb-4">Conversation</h3>
+
+        <!-- No comments -->
+        <div
+          *ngIf="
+            !selectedTicket?.comments || selectedTicket?.comments?.length === 0
+          "
+          class="text-center py-8"
+        >
+          <div
+            class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gray-100 text-gray-400"
+          >
+            <i class="bi bi-chat text-xl"></i>
+          </div>
+          <p class="mt-2 text-sm text-gray-500">No comments yet</p>
+        </div>
+
+        <!-- Comments list -->
+        <div
+          *ngIf="
+            (selectedTicket?.comments ?? []).length > 0
+          "
+          class="space-y-4 mb-6"
+        >
+          <div *ngFor="let comment of selectedTicket?.comments" class="flex">
+            <div class="flex-shrink-0 mr-3">
+              <div
+                class="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-500"
+              >
+                <i
+                  class="bi"
+                  [ngClass]="
+                    comment.creatorType === 'merchants'
+                      ? 'bi-person'
+                      : 'bi-headset'
+                  "
+                ></i>
+              </div>
+            </div>
+            <div class="flex-grow">
+              <div class="bg-gray-50 rounded-lg p-3">
+                <div class="flex justify-between items-center mb-1">
+                  <div class="text-sm font-medium text-gray-900">
+                    {{
+                      comment.creatorType === "merchants"
+                        ? "You"
+                        : "Support Agent"
+                    }}
+                  </div>
+                  <div class="text-xs text-gray-500">
+                    {{ formatDate(comment.createdAt) }}
+                  </div>
+                </div>
+                <p class="text-sm text-gray-600 whitespace-pre-line">
+                  {{ comment.text }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Add comment form -->
+        <div
+          *ngIf="
+            selectedTicket?.status !== 'Closed' &&
+            selectedTicket?.status !== 'Resolved'
+          "
+        >
+          <form [formGroup]="commentForm" (ngSubmit)="addComment()">
+            <div class="mb-3">
+              <label class="block text-sm font-medium text-gray-700 mb-1">
+                Add Comment
+              </label>
+              <textarea
+                formControlName="text"
+                rows="3"
+                class="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                [ngClass]="{
+                  'border-red-500 focus:ring-red-500 focus:border-red-500':
+                    commentForm.get('text')?.invalid &&
+                    commentForm.get('text')?.touched
+                }"
+                placeholder="Enter your comment here..."
+              ></textarea>
+              <div
+                *ngIf="
+                  commentForm.get('text')?.invalid &&
+                  commentForm.get('text')?.touched
+                "
+                class="mt-1 text-sm text-red-600"
+              >
+                Comment text is required
+              </div>
+            </div>
+
+            <div class="flex justify-end">
+              <button
+                type="submit"
+                class="px-4 py-2 bg-indigo-600 border border-transparent rounded-md text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                [disabled]="commentForm.invalid || isSubmitting"
+                [ngClass]="{
+                  'opacity-75 cursor-not-allowed':
+                    commentForm.invalid || isSubmitting
+                }"
+              >
+                <div class="flex items-center">
+                  <div *ngIf="isSubmitting" class="mr-2">
+                    <div
+                      class="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"
+                    ></div>
+                  </div>
+                  {{ isSubmitting ? "Sending..." : "Send Comment" }}
+                </div>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Ticket closed message -->
+        <div
+          *ngIf="
+            selectedTicket?.status === 'Closed' ||
+            selectedTicket?.status === 'Resolved'
+          "
+          class="text-center p-4 bg-gray-50 rounded-lg"
+        >
+          <p class="text-sm text-gray-600">
+            This ticket is {{ selectedTicket?.status?.toLowerCase() }}. You
+            cannot add more comments.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

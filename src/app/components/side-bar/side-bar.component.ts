@@ -25,6 +25,7 @@ export const Routes: RouteInfo[] = [
   { path: 'users', title: 'Users', class: 'false' },
   { path: 'reports', title: 'Reports', class: 'false' },
   { path: 'settlements', title: 'Settlements', class: 'false' },
+  { path: 'terminals', title: "Payment Terminals", class: 'false' },
   { path: 'transfer', title: 'Transfer', class: 'false' },
   { path: 'transaction', title: 'Transaction Filters', class: 'false' },
   { path: 'payroll', title: 'Payroll', class: 'false' },
@@ -34,6 +35,7 @@ export const Routes: RouteInfo[] = [
   { path: 'authorizers', title: 'Authorizers', class: 'false' },
   // { path: 'payment-links', title: 'Payment Links', class: 'false' },
   { path: 'payment-links-list', title: 'Payment Links List', class: 'false' },
+  { path: 'tickets', title: 'Tickets', class: 'false' },
   { path: 'kyc', title: 'KYC', class: 'false' },
 ];
 
@@ -126,6 +128,8 @@ export class SidebarComponent implements OnInit {
       profile: 'bi bi-person',
       users: 'bi bi-people',
       wallets: 'bi bi-wallet',
+      'terminals': 'bi bi-credit-card',
+      'tickets': 'bi bi-ticket-perforated',
 
       // 'mechant': 'bi bi-shop',
       reports: 'bi bi-file-earmark-text',

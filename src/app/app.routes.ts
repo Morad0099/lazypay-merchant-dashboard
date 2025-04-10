@@ -27,6 +27,8 @@ import { PaymentLinksPageComponent } from './pages/payment-links-page/payment-li
 import { DocumentationComponent } from './pages/documentation/documentation.component';
 import { HelpComponent } from './pages/help/help.component';
 import { AuthorizersListComponent } from './pages/authorizers-list/authorizers-list.component';
+import { PaymentTerminalsComponent } from './pages/payment-terminals/payment-terminals.component';
+import { TicketManagementComponent } from './pages/ticket-management/ticket-management.component';
 
 export const routes: Routes = [
   {
@@ -72,6 +74,10 @@ export const routes: Routes = [
         component: MoneyTransferComponent,
       },
       {
+        path: 'terminals',
+        component: PaymentTerminalsComponent,
+      },
+      {
         path: 'wallets',
         component: MerchantWalletsComponent,
       },
@@ -105,6 +111,10 @@ export const routes: Routes = [
       {
         path: 'transaction',
         component: TransactionDetailsComponent,
+      },
+      {
+        path: 'tickets',
+        component: TicketManagementComponent,
       },
       { 
         path: 'payroll', 

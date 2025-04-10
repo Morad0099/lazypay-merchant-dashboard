@@ -1,5 +1,5 @@
 import { Action, Selector, State, StateContext } from '@ngxs/store';
-import { AdminLogin, AutoLogin, CreateAdmin, Logout } from './app.actions';
+import { AdminLogin, AutoLogin, Logout } from './app.actions';
 import { Navigate } from '@ngxs/router-plugin';
 import { Injectable } from '@angular/core';
 import { AdminService } from "../../service/admin.service";
@@ -8,6 +8,7 @@ import { Router } from '@angular/router';
 interface StateModel {
   user: any;
   token: string;
+  refreshToken: string;
   error: any;
 }
 
@@ -16,6 +17,7 @@ interface StateModel {
   defaults: {
     user: null,
     token: '',
+    refreshToken: '',
     error: null,
   },
 })
@@ -29,6 +31,11 @@ export class AuthState {
   @Selector()
   static token(state: StateModel) {
     return state.token;
+  }
+
+  @Selector()
+  static refreshToken(state: StateModel) {
+    return state.refreshToken;
   }
 
   @Selector()
@@ -57,13 +64,22 @@ export class AuthState {
     { patchState, dispatch }: StateContext<StateModel>,
     { payload }: AdminLogin
   ) {
-    console.log('Storing token in local storage:', payload.token); // Debug log
-    localStorage.setItem('PLOGIN', JSON.stringify(payload));
+    console.log('Storing auth data in local storage:', payload); // Debug log
+    
+    // Ensure we're storing the refresh token as well
+    const loginData = {
+      user: payload.user,
+      token: payload.token,
+      refreshToken: payload.refreshToken
+    };
+    
+    localStorage.setItem('PLOGIN', JSON.stringify(loginData));
+    
     patchState({
       user: payload.user,
       token: payload.token,
+      refreshToken: payload.refreshToken
     });
-    // dispatch(new Navigate(['payment-reconciliation']));
   }
 
   @Action(Logout)

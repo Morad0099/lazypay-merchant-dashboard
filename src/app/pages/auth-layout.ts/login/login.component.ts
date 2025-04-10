@@ -116,6 +116,7 @@ export class LoginComponent implements OnInit {
           this.store.dispatch(new AdminLogin({
             user: response.data,
             token: response.token,
+            refreshToken: response.refreshToken
           })).subscribe({
             next: () => {
               this.loading = false;
