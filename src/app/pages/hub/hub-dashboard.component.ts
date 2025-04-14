@@ -88,13 +88,35 @@ export class HubDashboardComponent implements OnInit {
 
   ngOnInit() {
     this.store.select(AuthState.user).subscribe(user => {
-      if (user?.merchantId?._id) {
-        this.merchantId = user.merchantId._id;
+      
+      let merchantIdValue;
+      
+      if (typeof user?.merchantId === 'string') {
+        // If merchantId is a string, use it directly
+        merchantIdValue = user.merchantId;
+        console.log('Merchant ID found (string):', merchantIdValue);
+      } else if (user?.merchantId?._id) {
+        // If merchantId is an object with _id, use that
+        merchantIdValue = user.merchantId._id;
+      }
+      
+      if (merchantIdValue) {
+        this.merchantId = merchantIdValue;
         this.fetchApps(this.merchantId);
-        // this.fetchBalance(this.merchantId);
-        this.merchantname = user.merchantId.merchant_tradeName;
+        
+        // Set merchant name if available
+        if (typeof user?.merchantId === 'object' && user?.merchantId?.merchant_tradeName) {
+          this.merchantname = user.merchantId.merchant_tradeName;
+        } else {
+          // Default merchantname if not available
+          this.merchantname = 'Merchant';
+        }
+      } else {
+        console.log('No merchant ID found in user object');
       }
     });
+    console.log('After AuthState.user subscription');
+    
     this.apps.forEach(app => {
       this.isKeyVisible[app._id] = false;
     });
