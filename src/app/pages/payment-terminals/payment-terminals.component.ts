@@ -64,7 +64,7 @@ interface PaymentLink {
   standalone: true,
   imports: [CommonModule, FormsModule, ReactiveFormsModule],
   template: `
-    <div class="p-6 bg-gray-50 min-h-screen" style="margin-left: 200px;">
+    <div class="p-6 bg-gray-50 min-h-screen">
       <div class="mb-6">
         <h1 class="text-2xl font-bold text-gray-800">Payment Terminals</h1>
         <p class="text-gray-600">
