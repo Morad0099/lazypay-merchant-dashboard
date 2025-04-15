@@ -149,7 +149,7 @@ export class HubDashboardComponent implements OnInit {
         this.loading = false;
       },
       error: (err) => {
-        alert('Failed to fetch apps');
+        // alert('Failed to fetch apps');
         this.loading = false;
       }
     });
