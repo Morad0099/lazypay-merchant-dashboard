@@ -39,6 +39,7 @@ export interface SendMoneyPayload {
   description: string;
   initiatedBy: string;
   otp: string;
+  serviceType?: string; 
   // serviceName: string;
 }
 

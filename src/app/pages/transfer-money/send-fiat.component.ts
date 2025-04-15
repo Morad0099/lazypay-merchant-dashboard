@@ -139,6 +139,30 @@ import { ReactiveFormsModule } from '@angular/forms';
               >
                 Please select a bank
               </p>
+              <!-- Service Type Selection for Bank Transfers -->
+<div class="form-group mt-4" *ngIf="$service.sendMoneyForm.get('transferType')?.value === 'bank'">
+  <label class="block text-sm font-semibold text-gray-700 mb-2">Service Type</label>
+  <div class="grid grid-cols-2 gap-4">
+    <div 
+      class="p-4 border-2 rounded-xl cursor-pointer flex flex-col items-center text-center hover:border-blue-200 transition-all"
+      [class.border-blue-500]="$service.sendMoneyForm.get('serviceType')?.value === 'GIP'"
+      [class.bg-blue-50]="$service.sendMoneyForm.get('serviceType')?.value === 'GIP'"
+      (click)="$service.sendMoneyForm.patchValue({serviceType: 'GIP'})"
+    >
+      <span class="font-medium text-gray-700">GIP</span>
+      <p class="text-xs text-gray-500 mt-1">Ghana Interbank Payment (Standard)</p>
+    </div>
+    <div 
+      class="p-4 border-2 rounded-xl cursor-pointer flex flex-col items-center text-center hover:border-blue-200 transition-all"
+      [class.border-blue-500]="$service.sendMoneyForm.get('serviceType')?.value === 'NRT'"
+      [class.bg-blue-50]="$service.sendMoneyForm.get('serviceType')?.value === 'NRT'"
+      (click)="$service.sendMoneyForm.patchValue({serviceType: 'NRT'})"
+    >
+      <span class="font-medium text-gray-700">NRT</span>
+      <p class="text-xs text-gray-500 mt-1">Near Real-Time (Faster)</p>
+    </div>
+  </div>
+</div>
             </div>
           </ng-container>
 

@@ -5,6 +5,7 @@ import { MoneyTransferService } from './money-transfer.service';
 import {
   Bank,
   SendCryptoDetails,
+  SendMoneyPayload,
   WithdrawCryptoDetails,
 } from './money-transfer.types';
 import {
@@ -121,7 +122,10 @@ export class TransferMoneyService implements OnDestroy {
     private moneyTransferService: MoneyTransferService,
     private http: HttpClient
   ) {
+    // this.initializeForms();
+    this.activeTab = 'send'; // Set default tab
     this.initializeForms();
+    this.fetchBanks();
   }
 
   private initializeForms() {
@@ -133,6 +137,7 @@ export class TransferMoneyService implements OnDestroy {
       amount: ['', [Validators.required, Validators.min(1)]],
       description: ['', Validators.required],
       otp: [''],
+      serviceType: ['GIP'],
       // cryptoType: [''],
     });
 
@@ -402,7 +407,7 @@ private formatTime(seconds: number): string {
   }
 
   resetForms() {
-    this.sendMoneyForm.reset({ transferType: 'momo' });
+    this.sendMoneyForm.reset({ transferType: 'momo', serviceType: 'GIP', });
     this.fundWalletForm.reset({ account_issuer: 'mtn' });
     this.isAccountVerified = false;
     this.showOtpSection = false;
@@ -418,6 +423,9 @@ private formatTime(seconds: number): string {
     });
     this.isAccountVerified = false;
     this.showOtpSection = false;
+    if (transferType === 'bank') {
+      this.sendMoneyForm.get('serviceType')?.setValue('GIP');
+    }
   }
 
   get canVerify(): boolean {
@@ -540,11 +548,23 @@ private formatTime(seconds: number): string {
   }
   
   private buildWithdrawPayload(): any {
-    const user = this.store.selectSnapshot(AuthState.user);
+    const user = this.store.selectSnapshot((state) => state.auth.user);
+    
+    // Get merchantId handling both string and object formats
+    let merchantId;
+    if (typeof user?.merchantId === 'string') {
+      // If merchantId is a string, use it directly
+      merchantId = user.merchantId;
+      console.log('Merchant ID found (string):', merchantId);
+    } else if (user?.merchantId?._id) {
+      // If merchantId is an object with _id, use that
+      merchantId = user.merchantId._id;
+      console.log('Merchant ID found (object):', merchantId);
+    }
     const form = this.sendMoneyForm.value;
   
     return {
-      merchantId: user.merchantId?._id,
+      merchantId,
       account_type: form.cryptoType,
       transferMethod: form.transferMethod,
       account_issuer: form.account_issuer,
@@ -561,26 +581,42 @@ private formatTime(seconds: number): string {
 
     this.isSubmitting = true;
     const form = this.sendMoneyForm.value;
-    const userId = this.store.selectSnapshot(
-      (state) => state.auth.user?.merchantId._id
-    );
+    // const userId = this.store.selectSnapshot(
+    //   (state) => state.auth.user?.merchantId._id
+    // );
+    const user = this.store.selectSnapshot((state) => state.auth.user);
+    
+    // Get merchantId handling both string and object formats
+    let merchantId;
+    if (typeof user?.merchantId === 'string') {
+      // If merchantId is a string, use it directly
+      merchantId = user.merchantId;
+      console.log('Merchant ID found (string):', merchantId);
+    } else if (user?.merchantId?._id) {
+      // If merchantId is an object with _id, use that
+      merchantId = user.merchantId._id;
+      console.log('Merchant ID found (object):', merchantId);
+    }
     const initateId = this.store.selectSnapshot(
       (state) => state.auth.user?._id
     );
     try {
-      const payload = {
+      const payload: SendMoneyPayload = {
         account_issuer: form.account_issuer,
         account_name: form.account_name,
         account_number: form.account_number,
         account_type: form.transferType,
         amount: form.amount.toString(),
-        merchantId: userId,
-        // customerType: 'merchants',
+        merchantId,
         description: form.description,
         initiatedBy: initateId,
         otp: form.otp,
-        // serviceName: 'banktrf',
       };
+  
+      // Add serviceType to payload if bank transfer
+      if (form.transferType === 'bank') {
+        payload.serviceType = form.serviceType;
+      }
 
       const response = await this.moneyTransferService.sendMoney(payload);
       if (response?.success) {
@@ -632,16 +668,35 @@ private formatTime(seconds: number): string {
 
     this.isSubmitting = true;
     const form = this.fundWalletForm.value;
-    const userId = this.store.selectSnapshot(
-      (state) => state.auth.user?.merchantId._id
-    );
+    // const userId = this.store.selectSnapshot(
+    //   (state) => state.auth.user?.merchantId._id
+    // );
+    const user = this.store.selectSnapshot((state) => state.auth.user);
+    
+    // Get merchantId handling both string and object formats
+    let merchantId;
+    if (typeof user?.merchantId === 'string') {
+      // If merchantId is a string, use it directly
+      merchantId = user.merchantId;
+      console.log('Merchant ID found (string):', merchantId);
+    } else if (user?.merchantId?._id) {
+      // If merchantId is an object with _id, use that
+      merchantId = user.merchantId._id;
+      console.log('Merchant ID found (object):', merchantId);
+    }
+
+    // if (!merchantId) {
+    //   this.error = 'Merchant ID not found';
+    //   this.isSubmitting = false;
+    //   return;
+    // }
 
     try {
       const payload = {
         account_issuer: form.account_issuer,
         account_number: form.account_number,
         amount: form.amount.toString(),
-        merchantId: userId,
+        merchantId: merchantId,
         // customerType: 'merchants',
         otp: form.otp,
       };
@@ -742,11 +797,30 @@ private formatTime(seconds: number): string {
   }
   
   private buildSendCryptoPayload(): any {
-    const user = this.store.selectSnapshot(AuthState.user);
+    // const user = this.store.selectSnapshot(AuthState.user);
+    const user = this.store.selectSnapshot((state) => state.auth.user);
+    
+    // Get merchantId handling both string and object formats
+    let merchantId;
+    if (typeof user?.merchantId === 'string') {
+      // If merchantId is a string, use it directly
+      merchantId = user.merchantId;
+      console.log('Merchant ID found (string):', merchantId);
+    } else if (user?.merchantId?._id) {
+      // If merchantId is an object with _id, use that
+      merchantId = user.merchantId._id;
+      console.log('Merchant ID found (object):', merchantId);
+    }
+
+    // if (!merchantId) {
+    //   this.error = 'Merchant ID not found';
+    //   this.isSubmitting = false;
+    //   return;
+    // }
     const { cryptoType, walletAddress, amount, accountName, description, otp } = this.cryptoForm.value;
   
     return {
-      merchantId: user.merchantId?._id,
+      merchantId,
       account_type: cryptoType,
       amount: amount,
       account_number: walletAddress,
@@ -758,11 +832,23 @@ private formatTime(seconds: number): string {
   }
 
   private cryptoSendPayload(): any {
-    const user = this.store.selectSnapshot(AuthState.user);
+    const user = this.store.selectSnapshot((state) => state.auth.user);
+    
+    // Get merchantId handling both string and object formats
+    let merchantId;
+    if (typeof user?.merchantId === 'string') {
+      // If merchantId is a string, use it directly
+      merchantId = user.merchantId;
+      console.log('Merchant ID found (string):', merchantId);
+    } else if (user?.merchantId?._id) {
+      // If merchantId is an object with _id, use that
+      merchantId = user.merchantId._id;
+      console.log('Merchant ID found (object):', merchantId);
+    }
     const { withdrawalMethod, account_issuer, account_number, amount, account_name, description, otp } = this.withdrawForm.value;
   
     return {
-      merchantId: user.merchantId?._id,
+      merchantId,
       account_type: withdrawalMethod,
       amount: amount,
       account_issuer: account_issuer,
@@ -779,8 +865,27 @@ private formatTime(seconds: number): string {
   
     this.isSubmitting = true;
     const form = this.withdrawForm.value;
-    const user = this.store.selectSnapshot(AuthState.user);
-  
+    // const user = this.store.selectSnapshot(AuthState.user);
+
+    const user = this.store.selectSnapshot((state) => state.auth.user);
+    
+    // Get merchantId handling both string and object formats
+    let merchantId;
+    if (typeof user?.merchantId === 'string') {
+      // If merchantId is a string, use it directly
+      merchantId = user.merchantId;
+      console.log('Merchant ID found (string):', merchantId);
+    } else if (user?.merchantId?._id) {
+      // If merchantId is an object with _id, use that
+      merchantId = user.merchantId._id;
+      console.log('Merchant ID found (object):', merchantId);
+    }
+
+    // if (!merchantId) {
+    //   this.error = 'Merchant ID not found';
+    //   this.isSubmitting = false;
+    //   return;
+    // }  
     try {
       const payload = this.cryptoSendPayload();
     
@@ -806,10 +911,28 @@ private formatTime(seconds: number): string {
   async generateWallet() {
     this.isGenerating = true;
     try {
-      const user = this.store.selectSnapshot(AuthState.user);
-      const { amount, cryptoType } = this.depositForm.value;
+      const user = this.store.selectSnapshot((state) => state.auth.user);
+    
+      // Get merchantId handling both string and object formats
+      let merchantId;
+      if (typeof user?.merchantId === 'string') {
+        // If merchantId is a string, use it directly
+        merchantId = user.merchantId;
+        console.log('Merchant ID found (string):', merchantId);
+      } else if (user?.merchantId?._id) {
+        // If merchantId is an object with _id, use that
+        merchantId = user.merchantId._id;
+        console.log('Merchant ID found (object):', merchantId);
+      }
+  
+      // if (!merchantId) {
+      //   this.error = 'Merchant ID not found';
+      //   this.isSubmitting = false;
+      //   return;
+      // }
+            const { amount, cryptoType } = this.depositForm.value;
       let depositPayload = {
-        merchantId: user.merchantId?._id,
+        merchantId,
         account_type: cryptoType,
         amount: amount,
       };
